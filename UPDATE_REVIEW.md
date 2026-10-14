@@ -6,8 +6,8 @@
 
 - 初次公开源码：`229fa4391394bdaedea231aa8243c43bb4cef725`
 - 本轮功能更新：`812cf063c6a1c1f0f6501378c52ad308bfdddcea`
-- [查看这两个版本的完整差异](https://github.com/XXLDinosaur/chengjian-markdown/compare/229fa4391394bdaedea231aa8243c43bb4cef725...812cf063c6a1c1f0f6501378c52ad308bfdddcea)
-- [查看功能更新提交](https://github.com/XXLDinosaur/chengjian-markdown/commit/812cf063c6a1c1f0f6501378c52ad308bfdddcea)
+- [查看这两个版本的完整差异](https://github.com/XXLDinosaur/jianchengbiji/compare/229fa4391394bdaedea231aa8243c43bb4cef725...812cf063c6a1c1f0f6501378c52ad308bfdddcea)
+- [查看功能更新提交](https://github.com/XXLDinosaur/jianchengbiji/commit/812cf063c6a1c1f0f6501378c52ad308bfdddcea)
 
 功能提交共修改 33 个文件，新增 580 行、删除 110 行。之后的评审说明提交只补文档，不代表又改了一轮功能。
 
@@ -65,4 +65,4 @@ node tests/theme-menu.cjs
 
 ## 可直接交给 Gemini 的评审指令
 
-请审查 XXLDinosaur/chengjian-markdown 中提交 229fa4391394bdaedea231aa8243c43bb4cef725 到 812cf063c6a1c1f0f6501378c52ad308bfdddcea 的差异。先阅读 UPDATE_REVIEW.md 和 README.md，再检查对应模块的实际实现。请明确你实际读取到的提交 SHA；不要只根据 package.json 的 0.5.3 版本号判断代码未更新。请区分“已实现但需改进”“尚未实现”和“原本已有”，对具体问题注明文件、函数、触发步骤和建议。若无法访问代码，请明确说明访问限制，不要假装已经完成代码审查。
+请审查 XXLDinosaur/jianchengbiji 中提交 229fa4391394bdaedea231aa8243c43bb4cef725 到 812cf063c6a1c1f0f6501378c52ad308bfdddcea 的差异。先阅读 UPDATE_REVIEW.md 和 README.md，再检查对应模块的实际实现。请明确你实际读取到的提交 SHA；不要只根据 package.json 的 0.5.3 版本号判断代码未更新。请区分“已实现但需改进”“尚未实现”和“原本已有”，对具体问题注明文件、函数、触发步骤和建议。若无法访问代码，请明确说明访问限制，不要假装已经完成代码审查。

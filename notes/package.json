@@ -1,0 +1,110 @@
+{
+  "name": "chengjian-notes",
+  "version": "0.9.5",
+  "description": "简成笔记 — 本地仓库与文档编辑",
+  "author": "成简",
+  "license": "MIT",
+  "main": "src/main.cjs",
+  "scripts": {
+    "test:editor": "node tests/editing-parity.cjs",
+    "test:parity": "node tests/editor-core-parity.cjs",
+    "icon": "node scripts/build-icon.cjs",
+    "build": "node scripts/build.cjs",
+    "start": "npm run build && electron .",
+    "test": "node --test tests/core.test.mjs && node tests/rich-editor.cjs && node tests/custom-colors.cjs && node tests/shortcuts.cjs && node tests/outline.cjs && node tests/v4.cjs && node tests/v5.cjs && node tests/format-painter.cjs && node tests/recovery.cjs",
+    "pack": "npm run build && electron-builder --win dir --x64",
+    "installer": "npm run build && electron-builder --win msi --x64",
+    "test:sharing": "node tests/roundtrip.cjs && node tests/exports.cjs",
+    "test:vault": "node tests/vaults.cjs && node tests/vault-context.cjs && node tests/tab-sessions.cjs",
+    "test:layout": "node tests/layout-v3.cjs",
+    "test:manager": "node tests/vault-manager.cjs && node tests/vault-move.cjs",
+    "test:window": "node tests/media-window.cjs",
+    "test:ui-v7": "node tests/ui-v7.cjs",
+    "test:ui-v8": "node tests/ui-v8.cjs",
+    "installer:msi": "npm run build && electron-builder --win msi --x64",
+    "test:welcome": "node tests/welcome-guide.cjs"
+  },
+  "devDependencies": {
+    "@tiptap/core": "3.31.3",
+    "@tiptap/extension-highlight": "^3.31.3",
+    "@tiptap/extension-image": "3.31.3",
+    "@tiptap/extension-table": "3.31.3",
+    "@tiptap/extension-task-item": "3.31.3",
+    "@tiptap/extension-task-list": "3.31.3",
+    "@tiptap/starter-kit": "3.31.3",
+    "dompurify": "3.4.15",
+    "katex": "^0.18.7",
+    "marked": "18.0.13",
+    "remark-gfm": "4.0.1",
+    "remark-parse": "11.0.0",
+    "turndown": "7.2.4",
+    "turndown-plugin-gfm": "1.0.2",
+    "unified": "11.0.5",
+    "unist-util-visit": "5.0.0",
+    "electron": "44.4.3",
+    "electron-builder": "26.15.3",
+    "esbuild": "0.27.4",
+    "playwright": "1.63.0",
+    "sharp": "0.35.4"
+  },
+  "build": {
+    "appId": "local.chengjian.notes",
+    "productName": "简成笔记",
+    "directories": {
+      "output": "发行版/MSI/0.9.5"
+    },
+    "files": [
+      "src/main.cjs",
+      "src/preload.cjs",
+      "src/files.cjs",
+      "dist/**/*",
+      "assets/**/*",
+      "src/vector-image.cjs",
+      "src/vector-image.ps1",
+      "src/vaults.cjs",
+      "src/resources.cjs",
+      "src/exports.cjs"
+    ],
+    "win": {
+      "target": "dir",
+      "icon": "assets/app-icon.ico",
+      "signExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "简成笔记",
+      "installerLanguages": [
+        "zh_CN"
+      ],
+      "language": "2052",
+      "artifactName": "简成笔记-Setup-${version}-${arch}.${ext}",
+      "deleteAppDataOnUninstall": false
+    },
+    "asarUnpack": [
+      "src/vector-image.ps1"
+    ],
+    "electronLanguages": [
+      "zh-CN",
+      "zh-TW",
+      "en-US"
+    ],
+    "compression": "maximum",
+    "msi": {
+      "artifactName": "简成笔记-${version}-${arch}.${ext}",
+      "createStartMenuShortcut": true,
+      "createDesktopShortcut": true,
+      "perMachine": true,
+      "shortcutName": "简成笔记",
+      "runAfterFinish": false,
+      "oneClick": false,
+      "additionalLightArgs": [
+        "-cultures:zh-cn"
+      ]
+    },
+    "msiProjectCreated": "./scripts/msi-localize.cjs"
+  }
+}

@@ -58,7 +58,7 @@ function scheduleAutoSave(){
   clearTimeout(autoTimer);if(!editor || !dirty() || !autoEnabled() || autoPaused || (!filePath && snapshot()===draftSnapshot))return;
   autoTimer=setTimeout(()=>{
     if(busy || autoPromise){scheduleAutoSave();return;}
-    autoPromise=(async()=>{try{if(filePath)await save(false,true);else{const captured=snapshot();await checked(api.draftWrite({name:$('fileName').textContent,text:serialize()}));draftSnapshot=captured;refresh();}}catch(e){autoPaused=true;toast(e.message);refresh();}finally{autoPromise=null;scheduleAutoSave();}})();
+    autoPromise=(async()=>{try{if(filePath){if(!await save(false,true))throw new Error('实时保存未完成，请点击保存重试');}else{const captured=snapshot();await checked(api.draftWrite({name:$('fileName').textContent,text:serialize()}));draftSnapshot=captured;refresh();}}catch(e){autoPaused=true;toast(e.message);refresh();}finally{autoPromise=null;scheduleAutoSave();}})();
   },900);
 }
 
@@ -103,7 +103,7 @@ const RichImage = Image.extend({
 });
 function createEditor(content) {
   editor?.destroy();
-  editor = new Editor({ element: $('editor'), extensions: [ListMedia, NoJump, Numbering, TextHighlight, Formula, HeadingListItem, WordStyles, WordText, StarterKit.configure({ listItem:false, link: { openOnClick: false } }), RichImage.configure({ allowBase64: true, inline:true }), TableKit.configure({ table: { resizable: true } }), TaskList, TaskItem.configure({ nested: true, HTMLAttributes: { 'data-type': 'taskItem' } })], content: htmlFromMarkdown(content), editorProps: { attributes: { 'aria-label': '文档编辑区', spellcheck: 'false' }, handlePaste: (_view, event) => {
+  editor = new Editor({ element: $('editor'), extensions: [ListMedia, NoJump, Numbering, TextHighlight, Formula, HeadingListItem, WordStyles, WordText, StarterKit.configure({ listItem:false, link: { openOnClick: false, autolink:false, linkOnPaste:false } }), RichImage.configure({ allowBase64: true, inline:true }), TableKit.configure({ table: { resizable: true } }), TaskList, TaskItem.configure({ nested: true, HTMLAttributes: { 'data-type': 'taskItem' } })], content: htmlFromMarkdown(content), editorProps: { attributes: { 'aria-label': '文档编辑区', spellcheck: 'false' }, handlePaste: (_view, event) => {
       const html=event.clipboardData?.getData('text/html') || '', plain=event.clipboardData?.getData('text/plain') || '';
       if (/mso-|<m:oMath|msEquation|<math\b/i.test(html)) {event.preventDefault();const from=editor.state.selection.from,to=editor.state.selection.to;locked(async()=>{const result=await checked(api.pasteWord({html,plain}));const normalized=normalizeWordHTML(result.html);editor.chain().insertContentAt({from,to},normalized).run();});return true;}
       if ([...(event.clipboardData?.items || [])].some(item => item.type.startsWith('image/'))) { event.preventDefault(); importImages('paste'); return true; } return false; } }, onUpdate: refresh, onSelectionUpdate: () => { refresh(); document.dispatchEvent(new Event('editor-caret')); } });
@@ -190,3 +190,4 @@ import('./outline.js');
 installWorkbench({getEditor:()=>editor, isBusy:()=>busy, toast, locked, save, rename:async name=>{if(filePath && dirty() && !(await save()))return false;const result=await checked(api.renameDocument(name));if(result.path)filePath=result.path;$('fileName').textContent=result.name;if(!filePath && autoEnabled())await checked(api.draftWrite({text:serialize(),name:result.name}));refresh();return true;}});
 
 installDocumentUI({getEditor:()=>editor,api,checked,locked,toast});
+

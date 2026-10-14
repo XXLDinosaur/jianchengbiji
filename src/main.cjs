@@ -25,9 +25,10 @@ function register(name, handler) {
 }
 app.whenReady().then(() => {
   app.setAppUserModelId('local.moye.markdown');
-  win = new BrowserWindow({ frame:false, width: 1440, height: 920, minWidth: 980, minHeight: 650, backgroundColor: '#f5f5f2', title: '成简', icon: path.join(__dirname, '../assets/app-icon.ico'), show: false, autoHideMenuBar: true,
+  win = new BrowserWindow({ frame:false, width: 1440, height: 920, minWidth: 980, minHeight: 650, backgroundColor: '#f5f5f2', title: '简成文档', icon: path.join(__dirname, '../assets/app-icon.ico'), show: false, autoHideMenuBar: true,
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: false } });
   Menu.setApplicationMenu(null);
+  require('./exports.cjs').installExportHandlers({register,getWindow:()=>win,getPath:()=>documentState?.path});
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   win.webContents.on('will-navigate', e => e.preventDefault());
   win.webContents.session.setPermissionRequestHandler((_wc, _permission, callback) => callback(false));
@@ -49,7 +50,7 @@ app.whenReady().then(() => {
     return result.canceled ? null : openFile(result.filePaths[0]);
   });
   register('new', () => { documentState = null; return state(); });
-  register('dirty', value => { dirty = Boolean(value); win.setTitle(`${dirty ? '● ' : ''}${documentState ? path.basename(documentState.path) : '未命名'} — 成简`); });
+  register('dirty', value => { dirty = Boolean(value); win.setTitle(`${dirty ? '● ' : ''}${documentState ? path.basename(documentState.path) : '未命名'} — 简成文档`); });
   register('confirm-leave', async () => {
     const { response } = await dialog.showMessageBox(win, { type: 'question', title: '保存修改', message: '当前文档有未保存的修改', buttons: ['保存', '不保存', '取消'], defaultId: 0, cancelId: 2, noLink: true });
     return ['save', 'discard', 'cancel'][response];
@@ -193,3 +194,4 @@ app.on('window-all-closed', async () => {
   // Draft assets survive restarts so recovered unsaved documents retain their images.
   app.quit();
 });
+

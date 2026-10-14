@@ -1,0 +1,10 @@
+import {mountGuide} from './welcome-guide.js';
+export function installHelp(){mountGuide({name:'简成文档',pages:[
+ ['开始记录','<h2>从第一份文档开始</h2><ol><li><strong>新建或打开：</strong>点击右上角「文件」，选择新建文档或打开文档，也可按 Ctrl+N / Ctrl+O。</li><li><strong>直接输入：</strong>点击正文开始写作；选中文字后，使用工具栏设置格式。</li><li><strong>第一次保存：</strong>按 Ctrl+S 选择名字和位置。之后开启实时保存即可自动写入文件。</li></ol><p class="welcome-tip">简成文档专注单份文档的写作，不包含仓库、文件夹管理或多文档标签页。</p>'],
+ ['编辑与导航','<h2>不用写标记，也能排版</h2><ul><li><strong>标题：</strong>光标停在段落内，选择一级、二级、三级标题或正文。</li><li><strong>编号：</strong>点击编号使用 1. 2. 3.，小角标切换样式；再次点击取消。图片和表格归属前面的内容。</li><li><strong>突出：</strong>选中文字点击突出，默认黄色；旁边的小角标选择颜色。</li><li><strong>格式刷：</strong>先点击来源段落，再单击格式刷、点击目标段落；双击格式刷可连续应用，Esc 退出。</li><li><strong>导航：</strong>点击导航，查看标题目录、查找或替换内容。</li></ul>'],
+ ['图片、表格与链接','<h2>让内容更完整</h2><ul><li><strong>图片：</strong>拖入、粘贴或点击图片按钮选择文件。单击图片调整宽度，双击放大查看。</li><li><strong>表格：</strong>点击表格选择行列数，在表格内编辑时可添加、删除行列。</li><li><strong>链接：</strong>选中文字后右键选择链接，或按 Ctrl+K。外部网址双击打开，右键可以取消或恢复跳转。</li></ul><p class="welcome-tip">移动 Markdown 文件时，把同名 .assets 资源文件夹一起带走，避免图片丢失。</p>'],
+ ['保存与导出','<h2>保存到本地，按需分享</h2><ul><li>「文件」菜单内可保存、另存为和设置实时保存。未命名内容先保留为本机草稿，正式归档请按 Ctrl+S。</li><li><strong>复制为富文本：</strong>复制整篇排版内容及内联图片。目标平台可能过滤图片或样式，粘贴后请检查。</li><li><strong>独立 HTML：</strong>样式和图片嵌入一个文件，浏览器离线打开即可阅读。</li><li><strong>A4 PDF / 打印：</strong>使用白底纸张，包含文档名页眉和页码；Ctrl+P 打开打印。</li></ul><p class="welcome-tip">保存失败时请检查提示并重试。网络图片需要能正常下载，重要文档建议定期备份。</p>'],
+ ['主题与浮窗','<h2>调整到舒服的样子</h2><ul><li><strong>缩放：</strong>Ctrl+鼠标滚轮或工具栏 − / ＋，点击百分比恢复 100%。</li><li><strong>主题：</strong>选择预设，或自定义配色、链接色、渐变、背景图与玻璃效果，完成后保留方案。</li><li><strong>浮窗：</strong>点击浮窗置顶，按住六点拖动柄移动，点击恢复窗口返回。</li><li><strong>标语：</strong>双击左上角的「大道简成」修改，Enter 保存，Esc 取消。</li></ul>'],
+ ['快捷键','<h2>常用操作，一键完成</h2><dl class="welcome-keys">'+[['新建 / 打开','Ctrl+N / Ctrl+O'],['保存 / 另存为','Ctrl+S / Ctrl+Shift+S'],['加粗 / 斜体','Ctrl+B / Ctrl+I'],['撤销 / 重做','Ctrl+Z / Ctrl+Y'],['查找 / 替换','Ctrl+F / Ctrl+H'],['标题 1 / 2 / 3','Ctrl+Alt+1 / 2 / 3'],['恢复正文','Ctrl+Alt+0'],['打印 / 使用帮助','Ctrl+P / F1']].map(([label,key])=>`<div><dt>${label}</dt><dd><kbd>${key}</kbd></dd></div>`).join('')+'</dl>']
+ ]});}
+

@@ -1,0 +1,13 @@
+body.rich-mode .welcome-home:is(#helpDialog,#usageGuide){display:flex;flex-direction:column;width:100%;max-width:1040px;min-height:650px;margin:0 auto;background:var(--paper,var(--panel));color:var(--text);border:1px solid var(--line);border-radius:var(--ui-radius,10px);overflow:hidden;box-sizing:border-box}
+body.rich-mode .welcome-home[hidden]{display:none!important}
+body.rich-mode.welcome-home-visible #editor,body.rich-mode.welcome-home-visible #autoSaveHint{display:none!important}
+body.rich-mode.welcome-home-visible #documentScroll{display:block!important;visibility:visible!important}
+body.rich-mode.welcome-home-visible #floatEmptyState{display:none!important}
+.welcome-home .welcome-header{padding:30px 36px}.welcome-home .welcome-body{display:flex;flex-direction:column;flex:1}.welcome-home .welcome-body nav{flex-direction:row;flex-wrap:wrap;gap:8px;border-right:0;border-bottom:1px solid var(--line);padding:16px 30px;overflow:visible}.welcome-home .welcome-body nav button{padding:8px 12px}.welcome-home .welcome-body nav button[aria-current=page]{color:var(--text);box-shadow:inset 0 -2px var(--accent)}
+body.rich-mode .welcome-home #guideContent{padding:34px 40px;overflow:visible;max-height:none;font-size:15px;line-height:1.9;min-height:330px}.welcome-home #guideContent h2{font-size:30px;line-height:1.5;margin:12px 0 20px}.welcome-home #guideContent h3{font-size:17px}.welcome-home .welcome-intro p{color:var(--text);opacity:.8}.welcome-home .welcome-cards article{background:color-mix(in srgb,var(--accent) 10%,transparent)}.welcome-home .welcome-footer{padding:20px 30px;flex-wrap:wrap}.welcome-home .welcome-footer>div{flex-wrap:wrap;margin-left:auto}.welcome-home button{color:inherit}.welcome-home .welcome-footer .primary{color:var(--text)}
+@media(max-width:700px){body.rich-mode .welcome-home:is(#helpDialog,#usageGuide){min-height:0}.welcome-home .welcome-header{padding:20px}.welcome-home .welcome-body nav{padding:10px;gap:4px}.welcome-home .welcome-body nav button{font-size:12px;padding:7px}.welcome-home .welcome-cards{grid-template-columns:1fr}.welcome-home .welcome-header h1{font-size:18px}body.rich-mode .welcome-home #guideContent{padding:20px}.welcome-home #guideContent h2{font-size:24px}.welcome-home .welcome-footer{padding:15px}}
+@media print{.welcome-home{display:none!important}}
+
+
+body.rich-mode .welcome-home:is(#helpDialog,#usageGuide){--text:var(--custom-document-text,#26392c);--muted:color-mix(in srgb,var(--text) 70%,transparent);--line:color-mix(in srgb,var(--text) 16%,transparent);--accent:var(--document-link,#2b8325);color:var(--text)}
+

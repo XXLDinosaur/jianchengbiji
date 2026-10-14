@@ -1,0 +1,4 @@
+import {getMarkRange} from '@tiptap/core';
+ export function linkAtEvent(ed,event){const hit=ed.view.posAtCoords({left:event.clientX,top:event.clientY});if(!hit)return null;const pos=Math.min(hit.pos,ed.state.doc.content.size),resolved=ed.state.doc.resolve(pos);for(const type of ['noJump','link']){const range=getMarkRange(resolved,ed.schema.marks[type])||getMarkRange(ed.state.doc.resolve(Math.min(pos+1,ed.state.doc.content.size)),ed.schema.marks[type]);if(range){const mark=ed.state.doc.nodeAt(range.from)?.marks.find(m=>m.type.name===type);if(mark)return {...range,href:mark.attrs.href,disabled:type==='noJump'};}}
+ const text=resolved.parent.textBetween(0,resolved.parent.content.size,'','\ufffc');for(const match of text.matchAll(/https?:\/\/[^\s<>"，。；！？]+/gi)){const href=match[0].replace(/[),.;!?]+$/,'');const from=resolved.start()+match.index,to=from+href.length;if(pos>=from&&pos<=to)return {from,to,href,disabled:false};}return null;}
+

@@ -1,0 +1,150 @@
+/* Shared UI geometry. Document typography is intentionally independent. */
+body.rich-mode{--ui-radius:6px;--ui-gap:8px;--ui-edge:12px;--ui-font:13px;--ui-weight:500;--ui-control:30px;display:flex;flex-direction:column;height:100vh}
+body.rich-mode :is(.topbar,.rich-toolbar,#documentTabs,#vaultPanel,#editor,.table-tools,.image-toolbar,dialog,.glass-context-menu,#vaultContextMenu,#vaultChoices,.tool-popover,.glass-select-menu,.badge,.sidebar-switcher,.document-tab,.managed-vault,.scheme-option,.color-row,#gradientControls,#imageControls,#themeThumbnail,#shortcutTip,#toast){border-radius:var(--ui-radius)!important}
+body.rich-mode :is(button,input:not([type=range]):not([type=checkbox]),select,textarea):not(.tiptap *){border-radius:var(--ui-radius)!important;font-family:inherit;font-size:var(--ui-font);font-weight:var(--ui-weight);line-height:1.4}
+body.rich-mode .split-tool{border-radius:var(--ui-radius)!important}
+body.rich-mode .split-tool>button{border-radius:0!important}
+body.rich-mode :is(.topbar,.rich-toolbar,#documentTabs){margin-left:var(--ui-edge);margin-right:var(--ui-edge)}
+body.rich-mode:not(.floating) .topbar{height:44px;min-height:44px;padding:6px 8px;gap:8px;margin-top:8px;margin-bottom:8px}
+body.rich-mode .rich-main{height:auto;flex:1;min-height:0}
+body.rich-mode .rich-toolbar{min-height:42px;margin-top:0;margin-bottom:8px;padding:5px 8px;gap:8px}
+body.rich-mode :is(.format-actions,.view-actions,.file-actions,.history-actions,.file-heading){gap:4px;align-items:center}
+body.rich-mode :is(.topbar,.rich-toolbar) button{height:var(--ui-control);min-height:var(--ui-control);padding:4px 8px;font-size:13px;font-weight:500;line-height:20px}
+body.rich-mode :is(.topbar,.rich-toolbar) .divider{height:18px;width:1px;margin:0 4px;opacity:.65}
+body.rich-mode .rich-toolbar .glass-select-button{min-width:94px;text-align:left}
+body.rich-mode :is(.auto-label,.badge,#fileName){font-size:13px;font-weight:500;line-height:20px}
+body.rich-mode .badge{padding:2px 8px;white-space:nowrap}
+body.rich-mode .brand,body.rich-mode:not(.floating) .brand{min-width:32px;width:32px}
+body.rich-mode .brand-mark,body.rich-mode .brand img{width:32px;height:32px}
+body.rich-mode .window-controls{gap:4px}
+body.rich-mode .window-controls button{width:30px;font-size:17px;padding:4px}
+body.rich-mode #documentTabs{min-height:32px;margin-top:0;margin-bottom:8px;gap:8px}
+body.rich-mode .document-tab{height:32px;flex-shrink:0}
+body.rich-mode .document-tab button{font-size:13px;font-weight:500;line-height:20px;padding:4px 8px}
+body.rich-mode .document-workspace{gap:12px;margin:0 var(--ui-edge);min-height:0}
+body.rich-mode #vaultPanel{box-sizing:border-box;flex:0 0 236px;width:236px;min-width:0;margin:0;padding:8px;gap:8px}
+body.rich-mode #vaultPanel :is(button,input,.vault-row,.outline-item,.vault-footer>strong,.vault-heading){font-size:13px;font-weight:500;line-height:20px}
+body.rich-mode #vaultPanel :is(button,input){padding:5px 8px;min-height:30px}
+body.rich-mode #vaultPanel :is(.sidebar-switcher,.nav-tabs){gap:4px;padding:3px}
+body.rich-mode #vaultPanel .vault-row{padding-top:5px;padding-bottom:5px;min-height:30px;border-radius:var(--ui-radius)}
+body.rich-mode #vaultPanel .outline-item{border-radius:var(--ui-radius);margin:4px 0}
+body.rich-mode #vaultPanel #documentOutline{padding:0;flex-basis:auto}
+body.rich-mode #vaultPanel .outline-heading{font-size:13px;font-weight:500;margin:8px 0}
+body.rich-mode .document-workspace #documentScroll{padding:0 0 28px;min-width:0}
+body.rich-mode #editor{max-width:none;margin:0;width:100%;box-sizing:border-box}
+body.rich-mode .page-caption,body.rich-mode .page-bottom{display:none}
+body.rich-mode .tiptap{max-width:1020px;margin:0 auto}
+body.rich-mode footer.word-status{height:24px;min-height:24px;margin:0 var(--ui-edge);padding:0;display:flex;justify-content:flex-end;align-items:center;border:0;border-radius:0;background:none;box-shadow:none;backdrop-filter:none;font-size:12px;color:var(--muted)}
+body.rich-mode footer.word-status [hidden]{display:none!important}
+body.rich-mode #wordCount{font-size:12px;font-weight:400;font-variant-numeric:tabular-nums}
+body.rich-mode :is(dialog,.glass-context-menu,.glass-select-menu,.tool-popover){font-size:13px;line-height:1.5}
+body.rich-mode :is(.glass-context-menu,.glass-select-menu,#vaultContextMenu,#vaultChoices) button{padding:6px 10px;min-height:32px;font-size:13px;font-weight:500}
+body.rich-mode dialog :is(h2,.manager-title){font-size:16px;font-weight:600}
+body.rich-mode #vaultManager .manager-home>img{display:block;width:84px;height:84px;margin:4px auto 8px}
+body.rich-mode #vaultManager .manager-home>h1{text-align:center;font-size:24px;font-weight:600;margin:0 0 4px}
+body.rich-mode #vaultManager .manager-version{text-align:center;font-size:12px;font-weight:400;margin:0 0 20px;color:var(--muted)}
+body.rich-mode .manager-action{padding:16px 0;gap:12px}
+body.rich-mode .manager-action strong{font-size:13px;font-weight:600}
+body.rich-mode .manager-action p{font-size:12px;line-height:1.6;margin:6px 0 0}
+body.rich-mode .managed-vault-name strong{font-size:13px;font-weight:500}
+body.rich-mode .managed-vault-name small{font-size:12px;font-weight:400}
+body.rich-mode .scheme-option{gap:12px;padding:10px}
+body.rich-mode .scheme-swatches i{border-radius:var(--ui-radius);margin-right:0;width:20px;height:20px}
+body.rich-mode .scheme-swatches{gap:4px}
+@media(max-width:1200px){body.rich-mode:not(.floating) .history-actions button{font-size:13px}body.rich-mode:not(.floating) .history-actions button::before{content:none}body.rich-mode .topbar #fileName{max-width:120px}body.rich-mode #vaultPanel{flex-basis:212px}body.rich-mode:not(.floating) .file-actions button{padding:4px 6px}}
+@media(max-width:1050px){body.rich-mode:not(.floating) .badge{display:none}body.rich-mode .topbar #fileName{max-width:100px}body.rich-mode :is(.topbar,.file-actions,.file-heading){gap:4px}}
+body.rich-mode.floating .document-workspace{margin:0 8px}
+body.rich-mode.floating .document-workspace #documentScroll{padding:0 0 8px}
+@media print{body.rich-mode .document-workspace{margin:0}body.rich-mode #editor{border-radius:0!important}body.rich-mode footer.word-status{display:none!important}}
+body.rich-mode .document-workspace #documentScroll{scrollbar-gutter:stable;border:1px solid var(--glass-edge);border-radius:var(--ui-radius);background:var(--paper);backdrop-filter:blur(var(--theme-blur,24px)) saturate(150%)}
+body.rich-mode #editor{border:0;background:transparent;box-shadow:none;backdrop-filter:none}
+@media print{body.rich-mode .document-workspace #documentScroll{border:0;border-radius:0;background:white;backdrop-filter:none}}
+body.rich-mode .history-actions button::before{content:none!important}
+body.rich-mode.custom-colors #editor{background:transparent!important;backdrop-filter:none!important;box-shadow:none!important}
+body.rich-mode .ui-icon{width:16px;height:16px;display:inline-block;vertical-align:-3px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+body.rich-mode button:has(.ui-icon){display:inline-flex;align-items:center;justify-content:center;gap:5px}
+/* 0.7: independently zoomable paper and quieter application chrome. */
+body.rich-mode{--ui-radius:10px}
+body.rich-mode .topbar :is(.file-heading,.auto-label,#newBtn,#openBtn,#saveAsBtn){display:none!important}
+body.rich-mode #appMotto{font-size:14px;font-weight:500;text-align:left;max-width:45vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;-webkit-app-region:no-drag}
+body.rich-mode #appMotto[hidden]{display:none!important}
+body.rich-mode #mottoInput{width:280px;max-width:45vw;height:30px;padding:4px 8px;background:var(--glass);border:1px solid var(--accent);color:var(--text);-webkit-app-region:no-drag}
+body.rich-mode .topbar #floatBtn{margin-left:auto}
+body.rich-mode .rich-toolbar .history-actions{display:flex;gap:4px;margin-left:4px;padding-left:8px;border-left:1px solid var(--line)}
+body.rich-mode .history-actions button,body.rich-mode .window-controls button{width:30px;height:30px;padding:6px;display:inline-flex;align-items:center;justify-content:center}
+body.rich-mode .window-controls .ui-icon{width:16px;height:16px;stroke-width:1.7;vertical-align:0}
+body.rich-mode .document-workspace #documentScroll{padding:0 16px 24px;scrollbar-gutter:stable;border:0;border-radius:0;background:transparent;backdrop-filter:none;overflow:auto}
+body.rich-mode #editor,body.rich-mode.custom-colors #editor{width:900px;max-width:none;margin:0 auto;border:1px solid var(--glass-edge);background:var(--paper)!important;backdrop-filter:blur(var(--theme-blur,24px)) saturate(150%)!important;box-shadow:var(--glass-shadow)!important}
+body.rich-mode .tiptap{max-width:none;padding:48px 65px 100px}
+body.rich-mode .page-bottom{display:block;width:100%;text-align:center;margin:16px 0 0;font-size:12px;line-height:20px;color:var(--muted)}
+body.rich-mode .vault-footer{justify-content:center;gap:8px;padding:10px 4px 2px}
+body.rich-mode .vault-footer>strong{font-size:13px;font-weight:500;line-height:30px;flex-shrink:0}
+body.rich-mode .vault-picker{flex:0 1 156px;width:156px;min-width:0}
+body.rich-mode #vaultPanel #vaultSelect{font-size:13px;font-weight:500;line-height:20px;min-height:30px;padding:4px 8px}
+body.rich-mode[data-theme=bamboo] .tiptap a,body.rich-mode[data-theme=bamboo] .tiptap a:visited{color:#2b8325!important}
+body.rich-mode.floating #appMotto,body.rich-mode.floating #mottoInput{display:none!important}
+body.rich-mode.floating #editor{width:100%;min-width:0}
+body.rich-mode.floating .page-bottom{display:none}
+@media print{body.rich-mode #editor,body.rich-mode.custom-colors #editor{width:100%!important;background:white!important;box-shadow:none!important;backdrop-filter:none!important}body.rich-mode .page-bottom{display:none!important}}
+/* 0.8: color controls and compact vault identity. Icon assets stay unchanged. */
+body.rich-mode .topbar .brand-mark,body.rich-mode .topbar .brand img{width:26px;height:26px}
+body.rich-mode .vault-picker{flex:0 1 132px;width:132px}
+body.rich-mode .vault-symbol{width:24px;height:30px;display:flex;align-items:center;justify-content:center;color:var(--muted)}
+body.rich-mode .vault-symbol .ui-icon{width:18px;height:18px}
+body.rich-mode .tiptap a,body.rich-mode .tiptap a:visited,body.rich-mode[data-theme=bamboo] .tiptap a,body.rich-mode[data-theme=bamboo] .tiptap a:visited{color:var(--document-link,var(--accent))!important}
+body.rich-mode .colors-dialog .color-row{display:grid;grid-template-columns:minmax(100px,1fr) 36px minmax(160px,1.3fr);gap:12px;align-items:center}
+body.rich-mode .colors-dialog .color-row input[type=color]{width:36px;height:36px;padding:2px}
+body.rich-mode .color-values{display:grid;grid-template-columns:1fr;gap:4px;min-width:0}
+body.rich-mode .colors-dialog .color-values input{box-sizing:border-box;width:100%;height:28px;padding:3px 8px;margin:0;font:12px Consolas,monospace;letter-spacing:.3px}
+body.rich-mode .color-values input[aria-invalid=true]{border-color:#d76b62!important}
+body.rich-mode .theme-effects #gradientControls>label:first-child{display:grid;grid-template-columns:100px 36px minmax(130px,1fr);gap:12px}
+body.rich-mode .theme-effects #gradientControls input[type=color]{width:36px!important;height:36px;margin:0;padding:2px}
+
+/* Align the visible leaf edge with the heading selector text, including SVG inset. */
+body.rich-mode .topbar .brand img{transform:translateX(7px)}
+body.rich-mode.workspace-empty #documentScroll,body.rich-mode.workspace-empty #autoSaveHint{visibility:hidden}
+body.rich-mode.workspace-empty .format-actions{opacity:.4}
+body.rich-mode.workspace-empty #documentTabs:empty{min-height:0;margin-bottom:0}
+#floatEmptyState{display:none}
+body.rich-mode.workspace-empty.floating #floatEmptyState{display:flex;flex:1;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--muted)}
+body.rich-mode.workspace-empty.floating #floatEmptyState>div{display:flex;gap:8px}
+body.rich-mode.workspace-empty.floating #documentScroll{display:none}
+body.rich-mode #restoreWindowBtn{flex-shrink:0;opacity:1}
+body.rich-mode #usageGuide{width:min(760px,calc(100vw - 32px));max-height:calc(100vh - 32px);padding:20px;box-sizing:border-box;overflow:hidden}
+body.rich-mode #usageGuide[open]{display:flex;flex-direction:column;gap:16px}
+.guide-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.guide-heading h1{font-size:20px;font-weight:600;margin:0}
+.guide-nav{display:flex;flex-wrap:wrap;gap:6px;flex-shrink:0}
+.guide-nav button{padding:6px 10px;border:1px solid var(--line)}
+.guide-nav [aria-pressed=true]{background:var(--accent-soft);color:var(--accent)}
+#guideContent{overflow:auto;min-height:0;max-height:55vh;padding:0 8px 0 0;line-height:1.85;font-size:14px}
+#guideContent h2{font-size:18px;margin:0 0 10px}#guideContent h3{font-size:15px;margin:20px 0 8px}
+#guideContent p{margin:6px 0 12px}#guideContent li{margin:10px 0}#guideContent ul,#guideContent ol{padding-left:24px}
+#guideContent .guide-note{padding:10px 12px;border-left:2px solid var(--accent);background:var(--accent-soft);border-radius:var(--ui-radius);font-size:13px}
+.guide-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding-top:12px;flex-shrink:0}
+.guide-footer span{font-size:12px;color:var(--muted)}.guide-footer button{padding:7px 14px;white-space:nowrap}
+.guide-keys{margin:0}.guide-keys>div{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}.guide-keys dd{margin:0;text-align:right}
+@media(max-width:600px){body.rich-mode #usageGuide{padding:14px;gap:10px}.guide-heading h1{font-size:17px}.guide-footer{align-items:flex-start}#guideContent{max-height:50vh}.guide-keys>div{flex-wrap:wrap}}
+/* Frameless floating windows need their own native drag surface. */
+#floatDragHandle{display:none}
+body.rich-mode.floating .rich-toolbar{-webkit-app-region:drag}
+body.rich-mode.floating #floatDragHandle{display:inline-flex;align-items:center;justify-content:center;align-self:flex-start;flex:0 0 28px;width:28px;height:30px;user-select:none;cursor:move;color:var(--muted);-webkit-app-region:drag}
+body.rich-mode.floating #floatDragHandle .ui-icon{width:18px;height:22px;stroke-width:3}
+body.rich-mode.floating .rich-toolbar :is(.format-actions,.view-actions,button,input,select,label){-webkit-app-region:no-drag}
+body.rich-mode :is(.topbar,.rich-toolbar,.table-tools,.image-toolbar,#documentTabs,#vaultPanel,.glass-context-menu,.glass-select-menu,.tool-popover,.word-status){user-select:none;-webkit-user-select:none}
+body.rich-mode :is(.tiptap,.tiptap *,input,textarea,[contenteditable=true]){user-select:text;-webkit-user-select:text}
+/* Popover top-layer defaults must not center the viewport-positioned menu. */
+.glass-select-menu[popover]{position:fixed;inset:auto;margin:0;max-width:calc(100vw - 16px)}
+.glass-select-menu[popover]::backdrop{background:transparent;backdrop-filter:none;pointer-events:none}
+/* Keep the upload action visibly button-shaped before hover. */
+body.rich-mode #uploadThemeImage{
+  background:var(--button-hover);
+  border:1px solid var(--glass-edge);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.27),0 2px 7px rgba(36,63,111,.045);
+  border-radius:var(--ui-radius);
+}
+body.rich-mode #uploadThemeImage:hover{background:var(--accent-soft)}
+
+
+body.rich-mode .topbar #fileMenuBtn{margin-left:auto;-webkit-app-region:no-drag}body.rich-mode .topbar #floatBtn{margin-left:0}body.rich-mode .topbar .file-actions{display:none}#fileMenu.file-actions{display:block}#fileMenu[hidden]{display:none!important}#fileMenu button{display:flex;width:100%;justify-content:space-between;font:inherit;padding:8px 12px}#fileMenu kbd{margin-left:24px;font-size:11px;opacity:.65}
+

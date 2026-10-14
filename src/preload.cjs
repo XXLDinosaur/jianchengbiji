@@ -1,5 +1,7 @@
 const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('desktop', {
+  exportImages:sources=>ipcRenderer.invoke('export-images',sources),
+  exportDocument:data=>ipcRenderer.invoke('export-document',data),
   windowControl:action=>ipcRenderer.invoke('window-control',action),
   editCommand:command=>ipcRenderer.invoke('edit-command',command),
   pasteWord:data=>ipcRenderer.invoke('paste-word',data),

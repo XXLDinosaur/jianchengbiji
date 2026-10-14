@@ -3,7 +3,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 fs.mkdirSync('dist', { recursive: true });
 fs.copyFileSync('src/rich.html', 'dist/index.html');
-const css=['src/style.css', 'src/rich.css', 'src/glass.css', 'src/document-ui.css'].map(file => fs.readFileSync(file, 'utf8')).join('\n');
+const css=['src/style.css', 'src/rich.css', 'src/glass.css', 'src/document-ui.css'].concat(['src/welcome-guide.css','src/welcome-home.css']).map(file => fs.readFileSync(file, 'utf8')).join('\n');
 fs.writeFileSync('dist/style.css',esbuild.transformSync(css,{loader:'css',minify:true}).code);
 const common={bundle:true,minify:true,metafile:true};
 const results=[
@@ -29,3 +29,5 @@ for(const [directory,data] of [...packages].sort((a,b)=>a[1].name.localeCompare(
  notices.push(`${data.name} ${data.version}\n${licenses.map(name=>fs.readFileSync(path.join(directory,name),'utf8')).join('\n')}`);
 }
 fs.writeFileSync('dist/THIRD-PARTY-NOTICES.txt',notices.join('\n\n----------------------------------------\n\n'));
+
+

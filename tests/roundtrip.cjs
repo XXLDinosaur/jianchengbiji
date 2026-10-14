@@ -14,7 +14,7 @@ const assert = require('node:assert/strict');
   const file = path.join(original, '原稿.md');
   await fs.writeFile(file, '# 保真测试\n\n<p></p>\n\n<p></p>\n\n正文\n\n<img src="图%20100%25.svg" width="300" alt="山">\n\n<table><tbody><tr><th colspan="2" colwidth="150,200"><p>合并标题</p></th></tr><tr><td rowspan="2" colwidth="150"><p>跨行</p></td><td colwidth="200"><p>第一段</p><p>第二段</p></td></tr><tr><td colwidth="200"><p><strong>加粗</strong></p></td></tr></tbody></table>\n\n结尾\n');
   const env = {...process.env, MOYE_TEST_PROFILE:path.join(temp,'profile')}; delete env.ELECTRON_RUN_AS_NODE;
-  app = await electron.launch({executablePath:require('electron'),args:[root,file],env});
+  app = await electron.launch({executablePath:process.env.EDITOR_TEST_EXECUTABLE||require('electron'),args:process.env.EDITOR_TEST_EXECUTABLE?[file]:[root,file],env});
   const page = await app.firstWindow(); page.setDefaultTimeout(12000);
   await page.waitForSelector('.tiptap h1'); await page.locator('#fileMenuBtn').click(); await page.locator('#autoSave').uncheck(); await page.locator('#fileMenuBtn').click();
   const shape = () => page.locator('.tiptap').evaluate(el => ({
@@ -46,3 +46,4 @@ const assert = require('node:assert/strict');
   await fs.rm(temp,{recursive:true,force:true,maxRetries:5,retryDelay:250});
  }
 })().catch(error=>{console.error(error);process.exitCode=1;});
+

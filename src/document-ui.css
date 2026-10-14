@@ -80,3 +80,11 @@ body.rich-mode #uploadThemeImage{
   border-radius:var(--ui-radius);
 }
 body.rich-mode #uploadThemeImage:hover{background:var(--accent-soft)}
+/* Center the document title independently of the unequal left/right controls. */
+body.rich-mode .topbar{position:relative}
+body.rich-mode .topbar .file-heading{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);max-width:calc(100% - 640px);margin:0;justify-content:center}
+body.rich-mode .topbar .file-heading #fileName{max-width:100%;text-align:center}
+body.rich-mode .topbar .file-heading #inlineFileName{max-width:100%;width:220px;text-align:center}
+
+body.rich-mode .topbar .file-actions{display:none}#fileMenu.file-actions{display:block}#fileMenu[hidden]{display:none!important}
+
