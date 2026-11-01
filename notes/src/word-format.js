@@ -8,9 +8,18 @@ export const WordStyles=Extension.create({name:'wordStyles',addGlobalAttributes(
 export const WordText=Mark.create({name:'wordText',addAttributes(){return {style:{default:'',parseHTML:e=>safeStyle(e.getAttribute('data-word-style'))}};},parseHTML(){return [{tag:'span[data-word-style]'}];},renderHTML({HTMLAttributes}){const style=safeStyle(HTMLAttributes.style);return ['span',{'data-word-style':style,style},0];}});
 
 export function normalizeWordHTML(source){
+ // Word field instructions are metadata, not visible text. Preserve the rendered
+ // field result outside these conditional blocks (e.g. Zotero citation numbers).
+ source=source.replace(/<!--\[if\s+supportFields\s*\]>[\s\S]*?<!\[endif\]-->/gi,'');
  source=source.replace(/<!--\[if[^>]*>/gi,'').replace(/<!\[endif\]-->/gi,'').replace(/<m:oMath(?:Para)?\b[^>]*>[\s\S]*?<\/m:oMath(?:Para)?>/gi,'').replace(/<xml\b[^>]*>[\s\S]*?<\/xml>/gi,'');
  const dom=new DOMParser().parseFromString(source,'text/html');
  for(const style of dom.querySelectorAll('style')){try{const sheet=new CSSStyleSheet();sheet.replaceSync(style.textContent);for(const rule of sheet.cssRules){if(!rule.selectorText)continue;try{for(const el of dom.body.querySelectorAll(rule.selectorText))el.setAttribute('style',rule.style.cssText+';'+(el.getAttribute('style')||''));}catch{}}}catch{}}
+ // Inspect Word-only properties before safeStyle strips them.
+ for(const el of [...dom.body.querySelectorAll('*')]){
+   const style=el.getAttribute('style')||'';
+   if(/(?:^|;)\s*mso-hide\s*:\s*all\b/i.test(style)||el.style.display==='none'||el.style.visibility==='hidden'){el.remove();continue;}
+   if(/^(P|H[1-6])$/.test(el.tagName)&&!el.textContent.replace(/[\s\u00a0]/g,'')&&!el.querySelector('img,table')&&/page-break-(?:before|after)\s*:\s*always/i.test(style))el.remove();
+ }
  const inherit=['font-family','font-size','font-weight','font-style','color','letter-spacing'];
  function walk(el,inherited={}){const own={...inherited};for(const key of inherit){const value=el.style?.getPropertyValue(key);if(value)own[key]=value;else if(own[key])el.style?.setProperty(key,own[key]);}for(const child of el.children)walk(child,own);}
  walk(dom.body);

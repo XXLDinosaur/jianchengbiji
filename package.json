@@ -1,6 +1,6 @@
 {
   "name": "moye-markdown",
-  "version": "0.5.7",
+  "version": "0.5.8",
   "description": "简成文档 — 轻松写，直接编辑",
   "author": "简成文档",
   "license": "MIT",
@@ -44,7 +44,7 @@
     "appId": "local.moye.markdown",
     "productName": "简成文档",
     "directories": {
-      "output": "发行版/MSI/0.5.7"
+      "output": "发行版/MSI/0.5.8"
     },
     "files": [
       "src/main.cjs",
