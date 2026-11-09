@@ -1,6 +1,6 @@
 {
   "name": "chengjian-notes",
-  "version": "0.9.6",
+  "version": "0.9.7",
   "description": "简成笔记 — 本地仓库与文档编辑",
   "author": "成简",
   "license": "MIT",
@@ -51,7 +51,7 @@
     "appId": "local.chengjian.notes",
     "productName": "简成笔记",
     "directories": {
-      "output": "发行版/MSI/0.9.6"
+      "output": "发行版/MSI/0.9.7"
     },
     "files": [
       "src/main.cjs",

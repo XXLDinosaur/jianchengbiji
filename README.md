@@ -8,9 +8,15 @@
 | 产品 | 当前版本 | 定位 | 源码 |
 | --- | --- | --- | --- |
 | 简成文档（原名成简） | 0.5.8 | 专注单篇文档写作与记录，不包含仓库管理 | 本仓库根目录 |
-| 简成笔记 | 0.9.6 | 相同的编辑能力，加上本地仓库、文件夹和多文档标签管理 | [notes/](notes/) |
+| 简成笔记 | 0.9.7 | 相同的编辑能力，加上本地仓库、文件夹和多文档标签管理 | [notes/](notes/) |
 
 ## 下载与本次更新
+
+**2026-11-09 · 简成笔记 0.9.7：修复保存冲突导致无法操作。** 当文件被外部修改、自动保存暂停时，新建及切换标签仍可使用，未保存内容保留在标签和恢复草稿中；关闭时正常确认，取消后可以再次操作。不会静默覆盖磁盘上的外部修改。
+
+[简成笔记 0.9.7 MSI](https://github.com/XXLDinosaur/jianchengbiji/releases/download/notes-v0.9.7/Jiancheng-Notes-0.9.7-x64.msi) · [简成文档 0.5.8 MSI](https://github.com/XXLDinosaur/jianchengbiji/releases/download/documents-v0.5.8-notes-v0.9.6/Jiancheng-Documents-0.5.8-x64.msi)
+
+此次仅更新笔记版，文档版保持 0.5.8。
 
 Windows x64 MSI 安装包请到 [Releases](https://github.com/XXLDinosaur/jianchengbiji/releases)。安装包未进行代码签名。安装产物与源代码分别发布，源码不包含依赖、用户文档或用户配置。
 
