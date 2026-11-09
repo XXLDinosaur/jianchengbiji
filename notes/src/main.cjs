@@ -102,6 +102,18 @@ function register(name,handler){registerRoute(name,win,handler);}
       if (result.canceled) return null;
       target = result.filePath;
     }
+    // A moved/deleted parent cannot be repaired by choosing "overwrite".
+    if(target){
+      const parent=await fs.stat(path.dirname(target)).catch(e=>{if(e.code==='ENOENT'||e.code==='ENOTDIR')return null;throw e;});
+      if(!parent?.isDirectory()){
+        if(automatic)throw new Error('自动保存已暂停：原保存文件夹不存在或不可用，请使用保存选择新位置。');
+        const choice=await dialog.showSaveDialog(win,{title:'原文件夹不存在，请为当前内容选择新的保存位置',defaultPath:path.join(app.getPath('documents'),path.basename(target)),filters});
+        if(choice.canceled)return null;
+        target=choice.filePath;
+        const destination=await fs.stat(path.dirname(target)).catch(()=>null);
+        if(!destination?.isDirectory())throw new Error('选择的保存文件夹不可用，当前编辑内容已保留，请选择有效位置。');
+      }
+    }
     if (documentState && target === documentState.path) {
       const disk = await fs.readFile(target).catch(e => { if (e.code === 'ENOENT') return null; throw e; });
       if (!disk || hash(disk) !== documentState.hash) {
