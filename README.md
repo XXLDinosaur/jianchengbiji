@@ -1,7 +1,7 @@
 <p align="center"><img src="notes/assets/app-icon.png" width="88" alt="简成竹叶图标"></p>
 <h1 align="center">简成文档 · 简成笔记</h1>
 <p align="center"><strong>把内容留在本地，把心思留给写作。</strong></p>
-<p align="center"><a href="https://github.com/XXLDinosaur/jianchengbiji/releases/latest">下载安装包</a> · <a href="#界面与功能">界面与功能</a> · <a href="#运行与构建">运行与构建</a> · <a href="OPEN_SOURCE.md">开源说明</a></p>
+<p align="center"><a href="https://github.com/XXLDinosaur/jianchengbiji/releases/latest">下载安装包</a> · <a href="#下载与本次更新">本次更新</a> · <a href="#界面与功能">界面与功能</a> · <a href="#运行与构建">运行与构建</a> · <a href="OPEN_SOURCE.md">开源说明</a></p>
 
 本地优先的 Windows Markdown 写作软件。直接编辑排版后的内容，文档保存在自己的电脑中。
 
@@ -12,19 +12,40 @@
 
 ## 下载与本次更新
 
-**2026-11-27 · 简成笔记 0.10.4、简成文档 0.5.11**
+**2026 年 11 月 27 日发布** · Windows x64 · [完整发布说明与 SHA-256 校验文件](https://github.com/XXLDinosaur/jianchengbiji/releases/tag/documents-v0.5.11-notes-v0.10.4)
 
-两款软件均支持拖入本地 Markdown 文档和「文件 → 检查更新」。简成笔记支持 #标签、全文搜索、文献摘录和按章节导出 Word。本版已移除会议面板和周会模板，已有纪要仍可作为普通笔记打开。
+| 简成文档 0.5.11 | 简成笔记 0.10.4 |
+| --- | --- |
+| [下载文档版 MSI](https://github.com/XXLDinosaur/jianchengbiji/releases/download/documents-v0.5.11-notes-v0.10.4/Jiancheng-Documents-0.5.11-x64.msi) | [下载笔记版 MSI](https://github.com/XXLDinosaur/jianchengbiji/releases/download/documents-v0.5.11-notes-v0.10.4/Jiancheng-Notes-0.10.4-x64.msi) |
 
-[简成笔记 0.10.4 MSI](https://github.com/XXLDinosaur/jianchengbiji/releases/download/documents-v0.5.11-notes-v0.10.4/Jiancheng-Notes-0.10.4-x64.msi) · [简成文档 0.5.11 MSI](https://github.com/XXLDinosaur/jianchengbiji/releases/download/documents-v0.5.11-notes-v0.10.4/Jiancheng-Documents-0.5.11-x64.msi)
+### 两款软件都可以拖入 Markdown、检查更新
 
-此次同时更新两个产品：原保存文件夹不存在时，手动保存会提示选择新位置，取消则保留编辑内容，避免点击覆盖后出现 ENOENT。
+- **拖入文档**　在 Windows 文件资源管理器中选中 `.md` 文件，拖到编辑区即可打开。简成文档每次打开一篇；简成笔记可一次拖入多篇，每篇在独立标签页打开，保存时写回原文件。拖入图片会插入正文，文档和图片请分开拖。
+- **检查更新**　启动后会自动检查新版，也可点右上角 **文件 → 检查更新…**。发现新版时，选 **稍后提醒** 可继续写作。要更新时，点 **下载安装包** 并选择保存位置，通过 SHA-256 校验后，再点 **打开安装向导**。
 
-Windows x64 MSI 安装包请到 [Releases](https://github.com/XXLDinosaur/jianchengbiji/releases)。安装包未进行代码签名。安装产物与源代码分别发布，源码不包含依赖、用户文档或用户配置。
+下图为简成笔记的「文件」菜单。「检查更新…」在菜单下方，简成文档也从这里进入。
 
-本次新增多级目录折叠，并修复 Word 粘贴时隐藏的 Zotero 域代码泄露为正文的问题。继续采用原文档版的简洁布局：保存、打印、帮助、富文本复制、A4 PDF 与独立 HTML 导出收进右上角「文件」菜单。保留软件内部的离线使用首页、主题、图片与表格编辑和浮窗。笔记版继续保留仓库与标签页。
+![简成笔记的文件菜单，检查更新位于帮助上方](docs/images/release-file-menu.png)
 
-完整发布说明见 [CHANGELOG.md](CHANGELOG.md)，开源范围与参与方式见 [OPEN_SOURCE.md](OPEN_SOURCE.md)。
+### 简成笔记可以按 #标签找笔记
+
+在仓库笔记的正文中写下 `#论文 #方法` 并保存，然后点左侧 **#标签**。下图中的 **#论文（2）** 表示仓库里有两篇笔记使用了这个标签。点标签名查看文件列表，再点文件名打开原文。同一篇内重复写同一个标签只计一次。
+
+![仓库标签列表，方法和文献各有一篇笔记，论文有两篇](docs/images/release-tags.png)
+
+要找正文中的一句话，可按 **Ctrl+Shift+F** 搜索整个仓库，再用文件夹或标签缩小范围。
+
+### 从文献摘录到按章节导出 Word
+
+1. 在简成笔记中打开一篇阅读笔记，点 **笔记工具 → 插入文献摘录…**，分别填写原文、自己的理解和出处。
+2. 写好各章后，点 **文件 → 按章节导出 Word…**，从仓库选择要合并的笔记。
+3. 用 **上移 / 下移** 排好章节，点 **导出 Word**，即可得到一份可继续编辑的 `.docx`。
+
+![按章节导出 Word 对话框，研究问题排在阅读摘录之前，可调整顺序或添加章节](docs/images/release-chapters.png)
+
+本版已移除简成笔记的会议面板和周会模板。以前写的会议纪要仍可从原文件夹作为普通笔记打开。
+
+Windows 安装包未进行代码签名。历次改动见 [更新记录](CHANGELOG.md)。
 
 ## 界面与功能
 
@@ -61,9 +82,9 @@ Windows x64 MSI 安装包请到 [Releases](https://github.com/XXLDinosaur/jianch
 
 ![软件内部的功能介绍与使用首页](docs/images/welcome.png)
 
-> 以上为真实程序截图，文档内容为展示示例；不包含个人仓库或私人文档。
+> 截图中的笔记均为演示内容。
 
-### 新增：目录折叠，让长文更好找
+### 用目录折叠浏览长文
 
 两个软件都支持多级目录折叠。**点箭头收起 / 展开下级标题，点标题文字跳转正文**。折叠只影响左侧导航，不会隐藏或删除正文；展开父标题后，子标题原来的折叠状态会保留。
 
@@ -77,9 +98,9 @@ Windows x64 MSI 安装包请到 [Releases](https://github.com/XXLDinosaur/jianch
 
 点击图片可查看大图。只有包含下级标题的条目显示箭头；不要求标题级别连续。
 
-### 修复：从 Word 粘贴时保留可见内容
+### 从 Word 粘贴时保留可见内容
 
-过滤 Word 隐藏的引用域指令（例如 `ADDIN ZOTERO_ITEM CSL_CITATION`），保留可见引用编号和前后正文；移除仅用于强制分页的空段落，减少异常留白。此前已粘贴到文档里的乱码不会自动清除，请从 Word 重新复制粘贴。本次针对常见 Word HTML 结构增加了回归测试，不代表所有复杂 Word 排版都能完全一致还原。
+过滤 Word 隐藏的引用域指令（例如 `ADDIN ZOTERO_ITEM CSL_CITATION`），保留可见引用编号和前后正文；移除仅用于强制分页的空段落，减少异常留白。此前已粘贴到文档里的乱码不会自动清除，请从 Word 重新复制粘贴。
 
 ## 编辑与分享
 
