@@ -1,0 +1,20 @@
+.rich-mode .research-dialog {
+  width: min(540px, calc(100vw - 40px));
+  max-height: calc(100dvh - 48px);
+  overflow: auto;
+  color: var(--text);
+}
+.research-dialog form { display: grid; gap: 14px; }
+.research-dialog h2 { margin: 0; }
+.research-dialog .research-fields { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px 14px; }
+.research-dialog .research-fields label { display: grid; grid-column: 1/-1; gap: 4px; margin: 0; }
+.research-dialog .research-fields .research-half { grid-column: auto; }
+.research-dialog .research-fields :is(input,textarea) {
+  width: 100%; margin: 0; padding: 7px 9px; color: var(--text);
+  border: 1px solid var(--line); background: var(--panel); box-sizing: border-box;
+}
+.research-dialog textarea { resize: vertical; min-height: 42px; }
+.research-dialog .research-pick { grid-column: 1/-1; justify-self: start; color: var(--accent); padding: 3px 0; }
+.research-dialog .research-error { margin: 0; color: var(--text); font-weight: 600; }
+.research-dialog .research-error:empty { display: none; }
+.research-dialog .dialog-actions { position: sticky; bottom: 0; background: var(--panel); margin: 0; padding: 6px 0 0; }

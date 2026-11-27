@@ -1,7 +1,8 @@
-const { app, BrowserWindow, ipcMain, dialog, shell, Menu, clipboard } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, Menu, clipboard, net } = require('electron');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
+const {createUpdates} = require('./updates.cjs');
 const { readDocument, atomicSave, hash } = require('./files.cjs');
 const { relocateImages, prepareMarkdown } = require('../dist/document.cjs');
 let imageStagingDirectory;
@@ -28,6 +29,14 @@ app.whenReady().then(() => {
   win = new BrowserWindow({ frame:false, width: 1440, height: 920, minWidth: 980, minHeight: 650, backgroundColor: '#f5f5f2', title: '简成文档', icon: path.join(__dirname, '../assets/app-icon.ico'), show: false, autoHideMenuBar: true,
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: false } });
   Menu.setApplicationMenu(null);
+  const updates = createUpdates({current:app.getVersion(),stateFile:path.join(app.getPath('userData'),'update-check.json'),
+    fetch:(url,options)=>net.fetch(url,options),openExternal:url=>shell.openExternal(url),openPath:file=>shell.openPath(file)});
+  register('updates-check', mode => updates.check(mode));
+  register('updates-open', request => updates.open(request,async name => {
+    const result = await dialog.showSaveDialog(win,{title:'保存简成文档安装包',
+      defaultPath:path.join(app.getPath('downloads'),name),filters:[{name:'Windows 安装包',extensions:['msi']}]});
+    return result.canceled ? null : result.filePath;
+  }));
   require('./exports.cjs').installExportHandlers({register,getWindow:()=>win,getPath:()=>documentState?.path});
   win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   win.webContents.on('will-navigate', e => e.preventDefault());
@@ -44,6 +53,11 @@ app.whenReady().then(() => {
   register('initial', async () => {
     const file = process.argv.find(arg => /\.(md|markdown|mdown|txt)$/i.test(arg) && path.isAbsolute(arg));
     return file ? openFile(file) : null;
+  });
+  register('open-dropped-document', async file => {
+    if (typeof file !== 'string' || !path.isAbsolute(file) || !/\.(md|markdown|mdown|txt)$/i.test(file))
+      throw Error('请从本地文件夹拖入 Markdown 或 TXT 文档');
+    return openFile(file);
   });
   register('open', async () => {
     const result = await dialog.showOpenDialog(win, { title: '打开 Markdown 文档', filters, properties: ['openFile'] });

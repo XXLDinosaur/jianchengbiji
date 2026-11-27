@@ -1,11 +1,13 @@
 {
   "name": "moye-markdown",
-  "version": "0.5.9",
+  "version": "0.5.11",
   "description": "简成文档 — 轻松写，直接编辑",
   "author": "简成文档",
   "license": "MIT",
   "main": "src/main.cjs",
   "scripts": {
+    "test:updates": "node --test tests/updates.test.cjs && node tests/updates-ui.cjs",
+    "test:drop": "node tests/document-drop.cjs",
     "test:editor": "node tests/editing-parity.cjs",
     "test:parity": "node tests/editor-core-parity.cjs",
     "icon": "node scripts/build-icon.cjs",
@@ -44,10 +46,11 @@
     "appId": "local.moye.markdown",
     "productName": "简成文档",
     "directories": {
-      "output": "发行版/MSI/0.5.9"
+      "output": "发行版/MSI/0.5.11"
     },
     "files": [
       "src/main.cjs",
+      "src/updates.cjs",
       "src/preload.cjs",
       "src/files.cjs",
       "dist/**/*",

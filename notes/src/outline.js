@@ -77,7 +77,7 @@ new ResizeObserver(() => schedule()).observe(scroll);
 scroll.addEventListener('scroll', () => schedule(), { passive:true });
 scroll.addEventListener('load', () => schedule(), true);
 
-toggle(localStorage.getItem('moye.outline.visible') !== 'false');
+if (!window.showSidebar) toggle(localStorage.getItem('moye.outline.visible') !== 'false');
 // Initial empty state also needs a count when no headings have been added yet.
 $('outlineCount').textContent = '0';
 schedule(true);

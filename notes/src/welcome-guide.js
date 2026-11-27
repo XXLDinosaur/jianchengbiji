@@ -13,10 +13,11 @@ export function mountGuide({name,notes=false,pages}){
  button.onclick=open;dialog.querySelector('#guideNext').onclick=()=>show(current+1);
  for(const id of ['guideClose','guideDone'])dialog.querySelector('#'+id).onclick=()=>dialog.close();
  for(const [id,target] of [['guideNew','newBtn'],['guideOpen','openBtn']])dialog.querySelector('#'+id).onclick=()=>{close();document.getElementById(target).click();};
- document.addEventListener('click',e=>{if(!dialog.hidden&&e.target.closest('#documentTabs .document-tab,#vaultTree .vault-row,#newBtn,#openBtn,#floatNewDocument,#floatOpenDocument'))close();},true);
+ document.addEventListener('click',e=>{if(!dialog.hidden&&e.target.closest('#documentTabs .document-tab,#vaultTree .vault-row,#tagPane .tag-document,#newBtn,#openBtn,#floatNewDocument,#floatOpenDocument'))close();},true);
  document.addEventListener('keydown',e=>{if(e.key==='F1'){e.preventDefault();open();}else if(e.key==='Escape'&&!dialog.hidden&&!document.querySelector('dialog[open]')){e.preventDefault();close();}else if((e.ctrlKey||e.metaKey)&&['n','o'].includes(e.key.toLowerCase()))close();});
  let seen=false;try{seen=!!localStorage.getItem(key);}catch{}if(!seen||document.body.classList.contains('workspace-empty'))open();
 }
+
 
 
 

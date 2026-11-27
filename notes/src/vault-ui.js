@@ -1,5 +1,9 @@
+import {installTagPane} from './tag-pane.js';
 import {installVaultManager} from './vault-manager.js';
-export function installVaults({api,checked,locked,load,toast,tabs,getPath}){
+import {installSearchPane} from './search-pane.js';
+import {installResearch} from './research.js';
+import {installNoteTools} from './note-tools.js';
+export function installVaults({api,checked,locked,load,toast,tabs,getPath,getEditor}){
  const panel=document.createElement('aside');panel.id='vaultPanel';panel.setAttribute('aria-label','仓库文件');
  panel.innerHTML=`<div class="vault-heading"><button id="vaultRoot" title="选择仓库根目录">文件</button><span><button id="vaultTrash" title="将选中项目移到回收站" aria-label="回收站">♲</button><button id="vaultRefresh" title="刷新文件列表">↻</button></span></div><input id="vaultFilter" placeholder="筛选文件名" aria-label="筛选文件名"><div id="vaultFavorites"></div><div id="vaultTree" role="tree" tabindex="0" aria-label="文档和文件夹"></div><div class="vault-footer"><span class="vault-symbol" role="img" aria-label="仓库" title="仓库"><svg class="ui-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m3 9 9-6 9 6v12H3Z"/><path d="M8 21V11h8v10M8 15h8M8 18h8"/></svg></span><div class="vault-picker"><button id="vaultSelect" aria-label="选择仓库" aria-haspopup="listbox" aria-expanded="false">选择仓库</button><div id="vaultChoices" role="listbox" hidden></div></div></div>`;
  document.querySelector('.document-workspace').prepend(panel);
@@ -18,7 +22,7 @@ export function installVaults({api,checked,locked,load,toast,tabs,getPath}){
   if(state.root)await branch('',0);if(!fragment.length){const empty=document.createElement('p');empty.className='vault-empty';empty.textContent=state.root?'在这里右键，新建文档或文件夹。':'从左下角打开仓库，开始记录。';fragment.push(empty);} if(renaming)return;$('vaultTree').replaceChildren(...fragment);
   $('vaultFavorites').replaceChildren();const favorites=state.bookmarks?.[state.root]||[];if(favorites.length){const title=document.createElement('small');title.textContent='收藏';$('vaultFavorites').append(title);for(const p of favorites){const b=document.createElement('button');b.className='vault-favorite';b.textContent='☆ '+basename(p);b.title=p;b.onclick=()=>locked(async()=>{const item=(await call('list',{path:parentOf(p)})).find(i=>i.path===p);if(!item){toast('收藏项目已不存在');return;}select(item);if(item.folder){expanded.add(p);await render();}else await open(item);});$('vaultFavorites').append(b);}}
  }finally{rendering=false;}}
- async function update(next){listing.clear();state=next||await call('state');const list=$('vaultChoices');list.replaceChildren();for(const root of state.recent||[]){const option=document.createElement('button');option.setAttribute('role','option');option.setAttribute('aria-selected',String(root===state.root));option.textContent=state.names?.[root]||basename(root);option.title=root;option.onclick=()=>{closePicker();locked(()=>switchTo('select',{root}));};list.append(option);}const choose=document.createElement('button');choose.id='vaultChoose';choose.textContent='管理仓库';choose.onclick=()=>{closePicker();manager.open();};list.append(choose);$('vaultSelect').textContent=(state.root?(state.names?.[state.root]||basename(state.root)):'选择仓库');$('vaultSelect').title=state.root||'选择仓库';await render();}
+ async function update(next){listing.clear();state=next||await call('state');tagPane.refresh();searchPane.refresh();const list=$('vaultChoices');list.replaceChildren();for(const root of state.recent||[]){const option=document.createElement('button');option.setAttribute('role','option');option.setAttribute('aria-selected',String(root===state.root));option.textContent=state.names?.[root]||basename(root);option.title=root;option.onclick=()=>{closePicker();locked(()=>switchTo('select',{root}));};list.append(option);}const choose=document.createElement('button');choose.id='vaultChoose';choose.textContent='管理仓库';choose.onclick=()=>{closePicker();manager.open();};list.append(choose);$('vaultSelect').textContent=(state.root?(state.names?.[state.root]||basename(state.root)):'选择仓库');$('vaultSelect').title=state.root||'选择仓库';await render();}
  function closePicker(){$('vaultChoices').hidden=true;$('vaultSelect').setAttribute('aria-expanded','false');}
  async function switchTo(action,data){if(!await tabs.settleAll())return;const next=await call(action,data);if(next){selected=null;expanded.clear();await tabs.reset();await update(next);}}
  function renameInline(item){if(renaming)return;const row=[...$('vaultTree').querySelectorAll('[data-path]')].find(r=>r.dataset.path===item.path);if(!row)return;renaming=true;const label=row.querySelector('.vault-file-name'),input=document.createElement('input');input.className='vault-inline-name';input.setAttribute('aria-label','重命名');input.value=item.name;label.replaceWith(input);input.focus();input.setSelectionRange(0,item.folder?item.name.length:item.name.replace(/\.[^.]+$/,'').length);let finishing=false;
@@ -41,7 +45,81 @@ export function installVaults({api,checked,locked,load,toast,tabs,getPath}){
  $('vaultRoot').onclick=()=>select(null);$('vaultRoot').oncontextmenu=e=>{e.preventDefault();select(null);showMenu(e.clientX,e.clientY,null);};
  $('vaultSelect').onclick=()=>{const show=$('vaultChoices').hidden;$('vaultChoices').hidden=!show;$('vaultSelect').setAttribute('aria-expanded',String(show));if(show)document.querySelector('#vaultChoices button')?.focus();};document.addEventListener('pointerdown',e=>{if(!e.target.closest('.vault-picker'))closePicker();});document.addEventListener('keydown',e=>{if(e.key==='Escape')closePicker();});$('vaultRefresh').onclick=()=>locked(()=>update());$('vaultTrash').onclick=()=>locked(()=>trash(selected));
  let timer;$('vaultFilter').oninput=()=>{clearTimeout(timer);timer=setTimeout(()=>render().catch(e=>toast(e.message)),200);};window.addEventListener('focus',()=>{if(state.root)update().catch(e=>toast(e.message));});
- const switcher=document.createElement('div');switcher.className='sidebar-switcher';switcher.innerHTML='<button id="filesPaneTab" role="tab">文件</button><button id="navigationPaneTab" role="tab">导航</button>';panel.prepend(switcher);const nav=$('documentOutline');nav.setAttribute('aria-label','导航');nav.querySelector('.outline-heading strong').textContent='导航';panel.insertBefore(nav,panel.querySelector('.vault-footer'));const fileParts=['vaultFilter','vaultFavorites','vaultTree'];window.showSidebar=view=>{const navigation=view==='navigation';nav.hidden=!navigation;for(const id of fileParts)$(id).hidden=navigation;panel.querySelector('.vault-heading').hidden=navigation;$('filesPaneTab').setAttribute('aria-selected',String(!navigation));$('navigationPaneTab').setAttribute('aria-selected',String(navigation));localStorage.setItem('notes.sidebar',view);};$('filesPaneTab').onclick=()=>window.showSidebar('files');$('navigationPaneTab').onclick=()=>window.showSidebar('navigation');window.showSidebar(localStorage.getItem('notes.sidebar')||'files');
+ const tagPane=installTagPane(panel,{scan:()=>call('tags'),root:()=>state.root,open:file=>locked(()=>open({path:file}))});
+ function projectFolder(){return selected?.folder?selected.path:parentOf(selected?.path||'');}
+ async function openRelative(file){
+  const target=await call('resolve-link',{path:file,expectedRoot:state.root});
+  const opened=await locked(async()=>{
+   await tabs.open(target);
+   if(getPath()?.toLowerCase()!==target.toLowerCase())return false;
+   $('usageGuide')?.close();
+   select({path:file,name:basename(file),folder:false});
+   return true;
+  });
+  return opened===true;
+ }
+ async function createNote(name,markdown,folder=projectFolder()){
+  if(!state.root)throw Error('请先打开仓库');
+  const root=state.root;
+  return locked(async()=>{
+   const result=await call('create-template',{name,markdown,parent:folder,expectedRoot:root});
+   listing.clear();
+   let ancestor=folder;while(ancestor){expanded.add(ancestor);ancestor=parentOf(ancestor);}
+   $('vaultFilter').value='';
+   select({path:result.path,name:basename(result.path),folder:false});
+   await open(selected);
+   if(getPath()?.toLowerCase()!==absolute(result.path).toLowerCase())throw Error('笔记已创建，请从文件列表打开。');
+   $('usageGuide')?.close();
+   return result.path;
+  });
+ }
+ const root=()=>state.root;
+ const searchPane=installSearchPane(panel,{call,open:openRelative,root,getEditor,showSearch:()=>window.showSidebar('search')});
+ const research=installResearch({getEditor,getPath,call,createNote,toast});
+ installNoteTools(research,toast);
+ // Existing Markdown notes can link to a document in the same folder.
+ document.addEventListener('click', event => {
+  const href=event.target.closest?.('.tiptap a')?.getAttribute('href');
+  if(!href?.startsWith('./'))return;
+  let name;
+  try {name=decodeURIComponent(href.slice(2));} catch {return;}
+  if(!/^[^\\/:]+[.](?:md|markdown|mdown|txt)$/i.test(name))return;
+  const base=state.root?.replaceAll('\\','/').replace(/\/$/,'');
+  const doc=getPath()?.replaceAll('\\','/');
+  if(!base || !doc?.toLowerCase().startsWith(base.toLowerCase()+'/'))return;
+  const parent=parentOf(doc.slice(base.length+1));
+  event.preventDefault();
+  openRelative(parent ? parent+'/'+name : name).catch(error=>toast(error.message));
+ },true);
+ const switcher=document.createElement('div');
+ switcher.className='sidebar-switcher';
+ panel.prepend(switcher);
+ const nav=$('documentOutline');
+ nav.setAttribute('aria-label','导航');
+ nav.querySelector('.outline-heading strong').textContent='导航';
+ panel.insertBefore(nav,panel.querySelector('.vault-footer'));
+ const views=[['files','文件','filesPaneTab'],['search','搜索','vaultSearchTab'],['tags','#标签','tagsPaneTab'],['navigation','导航','navigationPaneTab']];
+ for(const [view,label,id] of views){
+   const tab=document.createElement('button');
+   tab.id=id;tab.textContent=label;tab.setAttribute('role','tab');
+   tab.onclick=()=>window.showSidebar(view);
+   switcher.append(tab);
+ }
+ window.showSidebar=view=>{
+   if(!views.some(([key])=>key===view))view='files';
+   nav.hidden=view!=='navigation';
+   $('outlineBtn').setAttribute('aria-expanded',String(!nav.hidden));
+   $('outlineBtn').classList.toggle('active',!nav.hidden);
+   tagPane.show(view==='tags');
+   searchPane.show(view==='search');
+   for(const id of ['vaultFilter','vaultFavorites','vaultTree']) $(id).hidden=view!=='files';
+   panel.querySelector('.vault-heading').hidden=view!=='files';
+   for(const [key,,id] of views) $(id).setAttribute('aria-selected',String(view===key));
+   localStorage.setItem('notes.sidebar',view);
+ };
+ window.showSidebar(localStorage.getItem('notes.sidebar')||'files');
  const manager=installVaultManager({call,locked,tabs,toast,onChange:async next=>{if(next.root!==state.root){selected=null;expanded.clear();await tabs.reset();}await update(next);}});
  update().catch(e=>toast(e.message));
 }
+
+

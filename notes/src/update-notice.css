@@ -1,0 +1,5 @@
+#updateNotice{position:fixed;right:14px;bottom:42px;z-index:1700;box-sizing:border-box;width:min(335px,calc(100vw - 28px));padding:14px 16px;border:1px solid var(--line);border-radius:var(--ui-radius,6px);background:var(--panel);color:var(--text);box-shadow:0 4px 20px #172d4229;font-size:13px}
+#updateNotice[hidden],#updateNotice button[hidden]{display:none}
+#updateNotice strong{font-size:15px}
+#updateNotice p{margin:7px 0 13px;line-height:1.55;color:var(--muted)}
+#updateNotice footer{display:flex;justify-content:flex-end;gap:8px}

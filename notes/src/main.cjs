@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, dialog, shell, Menu, clipboard } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, Menu, clipboard, net } = require('electron');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { pathToFileURL } = require('node:url');
@@ -10,10 +10,22 @@ app.setName('简成笔记');
 app.setPath('userData', path.join(app.getPath('appData'), 'ChengjianNotes'));
 if (process.env.MOYE_TEST_PROFILE) app.setPath('userData', process.env.MOYE_TEST_PROFILE);
 const routes=new Map();
+// Serialize writes to the same file from different editor windows.
+const pendingWrites = new Map();
+async function withFileWrite(file, action) {
+  const key = path.resolve(file).toLowerCase();
+  const previous = pendingWrites.get(key) || Promise.resolve();
+  const work = previous.catch(() => {}).then(action);
+  pendingWrites.set(key, work);
+  try { return await work; }
+  finally { if (pendingWrites.get(key) === work) pendingWrites.delete(key); }
+}
 function registerRoute(name,win,handler){
  if(!routes.has(name)){const handlers=new Map();routes.set(name,handlers);ipcMain.handle(name,async(event,...args)=>{const route=handlers.get(event.sender.id);if(!route||event.senderFrame!==event.sender.mainFrame)throw Error('无效请求');try{return await route(...args);}catch(error){return {error:error.message};}});}
  routes.get(name).set(win.webContents.id,handler);
 }
+const {createUpdates} = require('./updates.cjs');
+let updates;
 let windowCount=0;
 async function createEditorWindow(initialFile=null,initialVault=null){
  const windowIndex=windowCount++,draftPrefix=windowIndex?'window-'+windowIndex+'-':'';
@@ -28,10 +40,21 @@ async function openFile(file) {
   return state();
 }
 function register(name,handler){registerRoute(name,win,handler);}
+  updates ??= createUpdates({current:app.getVersion(),stateFile:path.join(app.getPath('userData'),'update-check.json'),
+    fetch:(url,options)=>net.fetch(url,options),openExternal:url=>shell.openExternal(url),openPath:file=>shell.openPath(file)});
   const {Vaults}=require('./vaults.cjs'); const vaults=new Vaults(path.join(app.getPath('userData'),'vaults.json'));await vaults.init();
   win = new BrowserWindow({ frame:false,width: 1440, height: 920, minWidth: 980, minHeight: 650, backgroundColor: '#f5f5f2', title: '简成笔记', icon: path.join(__dirname, '../assets/app-icon.ico'), show: false, autoHideMenuBar: true,
     webPreferences: { preload: path.join(__dirname, 'preload.cjs'), contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: false } });
   require('./exports.cjs').installExportHandlers({register,getWindow:()=>win,getPath:()=>documentState?.path});
+  register('updates-check', mode => updates.check(mode));
+  register('updates-open', request => updates.open(request,async name => {
+    const result = await dialog.showSaveDialog(win,{title:'保存简成笔记安装包',
+      defaultPath:path.join(app.getPath('downloads'),name),filters:[{name:'Windows 安装包',extensions:['msi']}]});
+    return result.canceled ? null : result.filePath;
+  }));
+  const scanTags=require('./tag-index.cjs').createTagIndex();
+  const searchVault = require('./vault-search.cjs').createVaultSearch();
+  win.once('closed', searchVault.dispose);
   if(initialVault)await vaults.select(initialVault);
   const sessionFile=path.join(app.getPath('userData'),draftPrefix+'tabs-session.json');
   register('session-write',async ui=>{if(!ui||!Array.isArray(ui.entries)||JSON.stringify(ui).length>40*1024*1024)throw Error('标签恢复数据过大');const documents=Object.fromEntries([...tabStates,[activeTab,documentState]]);await atomicSave(sessionFile,JSON.stringify({ui,documents}));return true;});
@@ -50,6 +73,48 @@ function register(name,handler){registerRoute(name,win,handler);}
 
     if(action==='choose'){const result=await dialog.showOpenDialog(win,{title:'选择或创建仓库文件夹',properties:['openDirectory','createDirectory']});return result.canceled?null:vaults.select(result.filePaths[0]);}
     if(action==='select'){if(!vaults.recent.includes(data.root))throw Error('仓库不在最近列表中');return vaults.select(data.root);}
+    if(action==='tags')return scanTags(vaults);
+    if (data.expectedRoot !== undefined && vaults.root !== data.expectedRoot) throw Error('仓库已切换，请重试');
+    if (['research-pdf-pick', 'research-pdf-validate', 'research-pdf-open'].includes(action)) {
+      return require('./research.cjs').handleResearchPdf({action, href:data.href, vaults, notePath:documentState?.path, win});
+    }
+    if (action === 'word-pick') {
+      if (!vaults.root) throw Error('请先打开仓库');
+      const root = vaults.root;
+      const pick = await dialog.showOpenDialog(win, {
+        title:'选择要合并的章节', defaultPath:root, filters,
+        properties:['openFile','multiSelections']
+      });
+      if (pick.canceled) return null;
+      if (root !== vaults.root) throw Error('仓库已切换，请重新选择');
+      const files = [];
+      for (const file of pick.filePaths) {
+        const relative = path.relative(root, file);
+        await vaults.resolve(relative);
+        if (!/\.(md|markdown|mdown|txt)$/i.test(file)) throw Error('请选择当前仓库内的文档');
+        files.push(relative);
+      }
+      return {root,files};
+    }
+    if (action === 'word-export') {
+      const root = vaults.root, chapters = data.files;
+      if (!root || !Array.isArray(chapters) || !chapters.length || chapters.length > 200 ||
+          chapters.some(file => typeof file !== 'string') || new Set(chapters).size !== chapters.length)
+        throw Error('请选择 1 至 200 篇不同的章节');
+      const pick = await dialog.showSaveDialog(win, {title:'保存 Word 草稿',
+        defaultPath:path.join(root, path.parse(chapters[0]).name + (chapters.length > 1 ? '-合稿' : '') + '.docx'),
+        filters:[{name:'Word 文档',extensions:['docx']}]});
+      if (pick.canceled || !pick.filePath) return null;
+      if (root !== vaults.root) throw Error('仓库已切换，请重新选择');
+      if (!/\.docx$/i.test(pick.filePath)) throw Error('文件名应以 .docx 结尾');
+      const {bytes,warnings} = await require('../dist/chapter-word.cjs').makeChapterWord({vault:vaults,chapters,output:pick.filePath,readDocument});
+      const tmp = path.join(path.dirname(pick.filePath),'.'+require('node:crypto').randomUUID()+'.tmp');
+      await fs.writeFile(tmp,bytes,{flag:'wx'}).catch(async err=>{if(err.code!=='EEXIST')await fs.rm(tmp,{force:true});throw err;});
+      try { await fs.rename(tmp,pick.filePath); } finally { await fs.rm(tmp,{force:true}); }
+      return {path:pick.filePath,warnings};
+    }
+    if (action === 'search') return searchVault(vaults, data);
+    if (action === 'create-template') return {path: await vaults.createNote(data.parent || '', data.name, data.markdown)};
     if(action==='list')return vaults.list(data.path||'');
     if(action==='resolve-link'){const file=await vaults.resolve(data.path);if(!/\.(md|markdown|mdown|txt)$/i.test(file))throw Error('请选择文档');return file;}
     if(action==='open'){const file=await vaults.resolve(data.path);if(!/\.(md|markdown|mdown|txt)$/i.test(file))throw Error('请选择文档');return openFile(file);}
@@ -114,19 +179,21 @@ function register(name,handler){registerRoute(name,win,handler);}
         if(!destination?.isDirectory())throw new Error('选择的保存文件夹不可用，当前编辑内容已保留，请选择有效位置。');
       }
     }
-    if (documentState && target === documentState.path) {
-      const disk = await fs.readFile(target).catch(e => { if (e.code === 'ENOENT') return null; throw e; });
-      if (!disk || hash(disk) !== documentState.hash) {
-        if (automatic) throw new Error('自动保存已暂停：文件被其他程序修改，请手动保存或另存为。');
-        const { response } = await dialog.showMessageBox(win, { type: 'warning', message: '磁盘上的文件已被其他程序修改或删除。', detail: '覆盖会用当前编辑内容替换磁盘版本。可取消后使用“另存为”保留两份。', buttons: ['取消', '覆盖'], defaultId: 0, cancelId: 0, noLink: true });
-        if (response !== 1) return null;
+    return withFileWrite(target, async () => {
+      if (documentState && target === documentState.path) {
+        const disk = await fs.readFile(target).catch(e => { if (e.code === 'ENOENT') return null; throw e; });
+        if (!disk || hash(disk) !== documentState.hash) {
+          if (automatic) throw new Error('自动保存已暂停：文件被其他程序修改，请手动保存或另存为。');
+          const { response } = await dialog.showMessageBox(win, { type: 'warning', message: '磁盘上的文件已被其他程序修改或删除。', detail: '覆盖会用当前编辑内容替换磁盘版本。可取消后使用“另存为”保留两份。', buttons: ['取消', '覆盖'], defaultId: 0, cancelId: 0, noLink: true });
+          if (response !== 1) return null;
+        }
       }
-    }
-    text = await collectResources({ text, sourceDocument: documentState?.path, targetDocument: target, stagedImages, prepareMarkdown, relocateImages, writeImage });
-    const format = documentState || { encoding: 'utf8', bom: false, eol: '\n' };
-    const digest = await atomicSave(target, text, format);
-    documentState = { ...format, path: target, text, hash: digest };
-    return state();
+      text = await collectResources({ text, sourceDocument: documentState?.path, targetDocument: target, stagedImages, prepareMarkdown, relocateImages, writeImage });
+      const format = documentState || { encoding: 'utf8', bom: false, eol: '\n' };
+      const digest = await atomicSave(target, text, format);
+      documentState = { ...format, path: target, text, hash: digest };
+      return state();
+    });
   });
   register('draft-read', async () => { try { const data=JSON.parse(await fs.readFile(draftFile(),'utf8'));const draftRoot=path.join(app.getPath('userData'),'draft-assets')+path.sep;for(const image of prepareMarkdown(data.text).images){if(image.src.startsWith('file:')){const file=require('node:url').fileURLToPath(image.src);if(file.startsWith(draftRoot))stagedImages.set(image.src,{path:file,name:path.basename(file)});}}return data; } catch { return null; } });
   register('draft-write', async data => {
@@ -235,7 +302,10 @@ function register(name,handler){registerRoute(name,win,handler);}
       return pathToFileURL(path.resolve(documentState ? path.dirname(documentState.path) : '', decoded)).href;
     });
   });
-  register('external-link', async url => { if (typeof url === 'string' && /^https?:\/\//i.test(url)) await shell.openExternal(url); });
+  register('external-link', async url => {
+    if (typeof url === 'string' && /^https?:\/\//i.test(url)) return shell.openExternal(url);
+    return require('./research.cjs').openZoteroSource(url);
+  });
   register('close-result', allow => { closePending = false; if (allow) { closing = true; win.close(); } });
   const windowWebId=win.webContents.id;win.on('closed',()=>{for(const handlers of routes.values())handlers.delete(windowWebId);});
   win.loadFile(path.join(__dirname, '../dist/index.html'));
@@ -246,4 +316,5 @@ app.on('window-all-closed', async () => {
   // Draft assets survive restarts so recovered unsaved documents retain their images.
   app.quit();
 });
+
 

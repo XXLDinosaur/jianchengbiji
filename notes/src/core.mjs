@@ -54,3 +54,4 @@ export function relocateImages(source, relocate) {
   }
   return result;
 }
+

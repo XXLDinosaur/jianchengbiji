@@ -1,4 +1,7 @@
+import {installFileDrop,imageFile} from './file-drop.js';
 import {installExports} from './export-ui.js';
+import {installChapterExport} from './chapter-export.js';
+import {installUpdateNotice} from './update-notice.js';
 import {installGlassSelects} from './glass-selects.js';
 import {NoJump,installDocumentMenu} from './document-menu.js';
 import {installTabs} from './document-tabs.js';
@@ -44,7 +47,7 @@ markdown.addRule('sizedImage', { filter: 'img', replacement: (_content, node) =>
 markdown.addRule('editableTable', { filter: 'table', replacement: (_content, node) => `\n\n${node.outerHTML}\n\n` });
 markdown.addRule('taskItem', { filter: node => node.nodeName === 'LI' && node.getAttribute('data-type') === 'taskItem', replacement: (content, node) => `\n- [${node.getAttribute('data-checked') === 'true' ? 'x' : ' '}] ${content.trim()}\n` });
 function htmlFromMarkdown(text) {
-  const clean = DOMPurify.sanitize(prepareMarkdown(text).html, { ALLOWED_URI_REGEXP: /^(?:(?:https?|file|mailto|tel|note):|[^a-z]|[a-z+.-]+(?:[^a-z+.:-]|$))/i, ADD_ATTR: ['colwidth'], FORBID_TAGS: ['style', 'script', 'form', 'button', 'textarea', 'select', 'dialog', 'iframe', 'object', 'embed', 'svg', 'math', 'video', 'audio'], FORBID_ATTR: ['style', 'id', 'name', 'srcset'] });
+  const clean = DOMPurify.sanitize(prepareMarkdown(text).html, { ALLOWED_URI_REGEXP: /^(?:(?:https?|file|mailto|tel|note|zotero):|[^a-z]|[a-z+.-]+(?:[^a-z+.:-]|$))/i, ADD_ATTR: ['colwidth'], FORBID_TAGS: ['style', 'script', 'form', 'button', 'textarea', 'select', 'dialog', 'iframe', 'object', 'embed', 'svg', 'math', 'video', 'audio'], FORBID_ATTR: ['style', 'id', 'name', 'srcset'] });
   const dom = document.createElement('div'); dom.innerHTML = clean;
   for (const input of dom.querySelectorAll('input[type="checkbox"]')) {
     const item = input.closest('li'); if (item) { item.dataset.type = 'taskItem'; item.dataset.checked = String(input.checked); if (item.parentElement?.tagName === 'UL') item.parentElement.dataset.type = 'taskList'; } input.remove();
@@ -71,7 +74,7 @@ function refresh() {
   $('saveState').textContent = dirty() ? (!filePath && draftSnapshot===snapshot()?'草稿已保存':'未保存') : filePath ? '已保存' : '新文档';
   $('autoSaveHint').textContent = autoPaused ? '保存未完成，请检查后重试' : dirty() && draftSnapshot!==snapshot() ? '正在实时保存…' : '所有内容已实时保存';
   $('wordCount').textContent = `${editor.getText().replace(/\s/g, '').length.toLocaleString()} 字`;
-  $('status').textContent = filePath || '直接输入文字 · 可拖入图片'; $('status').title = filePath || '';
+  $('status').textContent = filePath || '可拖入 Markdown 文档或图片'; $('status').title = filePath || '';
   api.dirty(dirty() || !!tabs?.anyDirty()); scheduleAutoSave(); document.dispatchEvent(new Event('document-updated'));
   $('tableTools').hidden = !editor.isActive('table');
   
@@ -106,7 +109,7 @@ const RichImage = Image.extend({
 });
 function createEditor(content) {
   editor?.destroy();
-  editor = new Editor({ element: $('editor'), extensions: [ListMedia,NoJump,Numbering, TextHighlight, Formula, HeadingListItem, WordStyles, WordText, StarterKit.configure({ listItem:false, link: { openOnClick: false, autolink:false, linkOnPaste:false, protocols:['note'] } }), RichImage.configure({ allowBase64: true, inline:true }), TableKit.configure({ table: { resizable: true } }), TaskList, TaskItem.configure({ nested: true, HTMLAttributes: { 'data-type': 'taskItem' } })], content: htmlFromMarkdown(content), editorProps: { attributes: { 'aria-label': '文档编辑区', spellcheck: 'false' }, handlePaste: (_view, event) => {
+  editor = new Editor({ element: $('editor'), extensions: [ListMedia,NoJump,Numbering, TextHighlight, Formula, HeadingListItem, WordStyles, WordText, StarterKit.configure({ listItem:false, link: { openOnClick: false, autolink:false, linkOnPaste:false, protocols:['note','zotero'] } }), RichImage.configure({ allowBase64: true, inline:true }), TableKit.configure({ table: { resizable: true } }), TaskList, TaskItem.configure({ nested: true, HTMLAttributes: { 'data-type': 'taskItem' } })], content: htmlFromMarkdown(content), editorProps: { attributes: { 'aria-label': '文档编辑区', spellcheck: 'false' }, handlePaste: (_view, event) => {
       const html=event.clipboardData?.getData('text/html') || '', plain=event.clipboardData?.getData('text/plain') || '';
       if (/mso-|<m:oMath|msEquation|<math\b/i.test(html)) {event.preventDefault();const from=editor.state.selection.from,to=editor.state.selection.to;locked(async()=>{const result=await checked(api.pasteWord({html,plain}));const normalized=normalizeWordHTML(result.html);editor.chain().insertContentAt({from,to},normalized).run();});return true;}
       if ([...(event.clipboardData?.items || [])].some(item => item.type.startsWith('image/'))) { event.preventDefault(); importImages('paste'); return true; } return false; } }, onUpdate: refresh, onSelectionUpdate: ()=>{refresh();document.dispatchEvent(new Event("editor-caret"));} });
@@ -126,7 +129,7 @@ async function save(saveAs = false, automatic = false) { if(workspaceEmpty)retur
     editor.state.doc.descendants((node, pos) => { if (node.type.name === 'image' && relocated.has(node.attrs.src)) tr.setNodeMarkup(pos, undefined, { ...node.attrs, src: relocated.get(node.attrs.src) }); });
     editor.view.dispatch(tr.setMeta('addToHistory', false));
   }
-  originalText = result.text; savedDocument = automatic ? capturedSnapshot : snapshot(); setFileName(result.name); autoPaused=false;await checked(api.draftWrite(null));refresh(); if(!automatic)toast('文档已保存'); return true;
+  document.dispatchEvent(new Event('note-saved')); originalText = result.text; savedDocument = automatic ? capturedSnapshot : snapshot(); setFileName(result.name); autoPaused=false;await checked(api.draftWrite(null));refresh(); if(!automatic)toast('文档已保存'); return true;
 }
 async function canLeave() { if (!dirty()) return true; if(filePath && !autoPaused){try{if(await save(false,true))return true;}catch(e){autoPaused=true;toast(e.message);refresh();}} const answer = await checked(api.confirmLeave()); return answer === 'discard' || (answer === 'save' && await save()); }
 $('newBtn').onclick = () => locked(async () => { if (await canLeave()) {await checked(api.draftWrite(null));load(await checked(api.newDocument()));} });
@@ -145,7 +148,7 @@ async function importImages(kind, files = [], dropPosition = null) {
   const position = dropPosition ?? editor.state.selection.from; const results = [], errors = [];
   await locked(async () => {
     if (kind === 'files') {
-      const accepted = files.filter(file => /\.(png|jpe?g|gif|webp|svg|bmp|avif)$/i.test(file.name));
+      const accepted = files.filter(imageFile);
       if (!accepted.length) throw new Error('请拖入 PNG、JPG、SVG 等图片文件');
       if (accepted.length > 20) throw new Error('一次最多拖入 20 张图片');
       for (const file of accepted) { try { if (file.size > 40 * 1024 * 1024) throw new Error('图片超过 40 MB'); results.push(await checked(api.droppedImage({ name: file.name, bytes: new Uint8Array(await file.arrayBuffer()) }))); } catch(e) { errors.push(`${file.name}：${e.message}`); } }
@@ -155,14 +158,30 @@ async function importImages(kind, files = [], dropPosition = null) {
   if (errors.length) toast(errors[0]);
 }
 $('imageBtn').onclick = () => importImages('picker');
-let dragDepth = 0; const main = document.querySelector('main');
-const fileDrag = event => [...(event.dataTransfer?.types || [])].includes('Files');
-const clearDrag = () => { dragDepth = 0; main.classList.remove('file-drag-over'); };
-document.addEventListener('dragenter', e => { if (fileDrag(e)) { e.preventDefault(); dragDepth++; if (!busy) main.classList.add('file-drag-over'); } });
-document.addEventListener('dragover', e => { if (fileDrag(e)) { e.preventDefault(); e.dataTransfer.dropEffect = busy ? 'none' : 'copy'; } });
-document.addEventListener('dragleave', e => { if (fileDrag(e) && --dragDepth <= 0) clearDrag(); });
-document.addEventListener('dragend', clearDrag); window.addEventListener('blur', clearDrag);
-document.addEventListener('drop', e => { if (!fileDrag(e)) return; e.preventDefault(); e.stopPropagation(); clearDrag(); if ($('lightbox').open) return; const pos = editor.view.posAtCoords({ left: e.clientX, top: e.clientY })?.pos; importImages('files', [...e.dataTransfer.files], pos); }, true);
+installFileDrop({
+  isBusy:() => busy, toast,
+  async openDocuments(files) {
+    await startup;
+    await locked(async () => {
+      const failed = [];
+      for (const file of files) {
+        try {
+          const path = api.droppedDocumentPath(file);
+          if (!path) throw Error('请从本地文件夹拖入文件');
+          await tabs.open(path);
+          $('usageGuide')?.close();
+        } catch (error) { failed.push(file.name + '：' + error.message); }
+      }
+      if (failed.length) toast(failed.join('；'));
+    });
+  },
+  async insertImages(files,coords) {
+    await startup;
+    if (workspaceEmpty) { toast('请先新建或打开笔记，再拖入图片'); return; }
+    $('usageGuide')?.close();
+    await importImages('files',files,editor.view.posAtCoords(coords)?.pos);
+  }
+});
 function resizeSelected(width) { if (busy || !selectedImage()) return; editor.chain().focus().updateAttributes('image', { width: width == null ? null : clamp(Math.round(width), 24, 8192) }).run(); refresh(); }
 $('imageWidth').onchange = () => { if (Number($('imageWidth').value) > 0) resizeSelected(Number($('imageWidth').value)); };
 $('imageWidth').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); $('imageWidth').blur(); } };
@@ -198,12 +217,14 @@ tabs=installTabs({empty:emptyWorkspace,api,checked,locked,load,canLeave,refresh,
  restore:data=>{load({path:data.path,name:data.name,text:data.originalText,encoding:data.encoding==='UTF-16 LE'?'utf16le':'utf8'});editor.commands.setContent(data.json,{emitUpdate:false});savedDocument=data.savedDocument;originalText=data.originalText;editor.commands.setTextSelection(Math.min(data.selection||1,editor.state.doc.content.size));$('documentScroll').scrollTop=data.scroll||0;refresh();}
 });
 $('newBtn').onclick=()=>locked(()=>tabs.open(null));
-installVaults({api,checked,locked,canLeave,load,toast,tabs,getPath:()=>filePath});
+installVaults({api,checked,locked,load,toast,tabs,getPath:()=>filePath,getEditor:()=>editor});
 
 installDocumentMenu({getEditor:()=>editor,api,checked,locked,tabs,toast});
 
 installGlassSelects();
 installExports({getEditor:()=>editor,api,checked,toast,locked});
+installChapterExport({api,checked,toast,settle:()=>locked(()=>tabs.settleAll())});
+installUpdateNotice({api,checked,productName:'简成笔记'});
 
 $('openBtn').onclick=()=>locked(async()=>{const file=await checked(api.pickDocument());if(file)await tabs.open(file);});
 for(const [id,action] of [['windowMinimize','minimize'],['windowMaximize','maximize'],['windowClose','close']])$(id).onclick=()=>checked(api.windowControl(action)).catch(e=>toast(e.message));
@@ -215,5 +236,6 @@ $('floatOpenDocument').onclick=()=>$('openBtn').click();
 
 import { installHelp } from './usage-guide.js';
 startup.finally(()=>installHelp());
+
 
 

@@ -1,3 +1,4 @@
+import {installUpdateNotice} from './update-notice.js';
 import {installFileMenu} from './file-menu.js';
 import { installHelp } from './usage-guide.js';
 import {linkAtEvent} from './link-target.js';
@@ -37,6 +38,7 @@ export function installDocumentUI({getEditor,api,checked,locked,toast}){
  installHelp();
  installGlassSelects();
  installExports({getEditor,api,checked,toast,locked});
+ installUpdateNotice({api,checked,productName:'简成文档'});
 }
 
 

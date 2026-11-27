@@ -1,8 +1,19 @@
-# 简成笔记 0.9.8
+# 简成笔记 0.10.4
 
 本地 Markdown 文档管理软件，在简成文档编辑能力上增加仓库、文件夹和多标签功能。源码独立放在本目录。
 
-运行：`npm ci`，然后 `npm start`。
-构建 MSI：`npm run installer:msi`，产物在 `发行版/MSI/0.9.8/`。
+将本地 Markdown 文档从资源管理器拖入窗口即可按原路径打开。可一次拖入多篇，已打开的文档会切回原标签。图片请单独拖入正文以插图。
 
-架构、下载、开源许可及本次更新请见[仓库首页](../README.md)、[开源说明](../OPEN_SOURCE.md)、[更新记录](../CHANGELOG.md)。本目录沿用 [MIT 许可证](LICENSE)。
+运行：`npm ci`，然后 `npm start`。
+验证全文搜索、文献、Word 导出和标签：`npm run test:workspace`。
+构建 MSI：`npm run installer:msi`，产物在 `发行版/MSI/0.10.4/`。
+
+可在「文件 → 检查更新」手动检查。启动后会在后台查询，成功检查后 24 小时内不会重复自动提醒。发现新版时，可点「下载安装包」选择保存位置。文件经 SHA-256 校验后，再点「打开安装向导」手动升级。也可选择「浏览器下载」。
+
+更新源为 [GitHub Releases](https://github.com/XXLDinosaur/jianchengbiji/releases)。发布正式版时，上传 `Jiancheng-Notes-版本号-x64.msi` 或 `简成笔记-版本号-x64.msi`。应用按笔记安装包的版本号比较，支持与简成文档合并发布。构建后可用 `npm run test:updates` 验证。
+
+在仓库笔记的正文写入 `#论文` 并保存，点击左侧「#标签」即可查看关联笔记。按 Ctrl+Shift+F 可搜索仓库正文。顶部「笔记工具」提供文献阅读、带出处的摘录和文献对照表。「文件 → 按章节导出 Word」可选择和重排多篇笔记，生成可批注的 Word 草稿。
+
+笔记保存在仓库的 Markdown 文件中。将本地来源 PDF 放在仓库内，随整个仓库移动即可保留相对链接。Word 草稿中的出处是文字和超链接。
+
+本目录沿用 [MIT 许可证](LICENSE)。

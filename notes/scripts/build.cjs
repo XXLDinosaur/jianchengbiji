@@ -3,12 +3,13 @@ const fs = require('node:fs');
 const path = require('node:path');
 fs.mkdirSync('dist', { recursive: true });
 fs.copyFileSync('src/rich.html', 'dist/index.html');
-const css=['src/style.css', 'src/rich.css', 'src/glass.css', 'src/vault.css', 'src/ui-system.css'].concat(['src/welcome-guide.css','src/welcome-home.css']).map(file => fs.readFileSync(file, 'utf8')).join('\n');
+const css=['src/style.css', 'src/rich.css', 'src/glass.css', 'src/vault.css', 'src/ui-system.css'].concat(['src/update-notice.css','src/welcome-guide.css','src/welcome-home.css','src/search-pane.css','src/research.css']).map(file => fs.readFileSync(file, 'utf8')).join('\n');
 fs.writeFileSync('dist/style.css',esbuild.transformSync(css,{loader:'css',minify:true}).code);
 const common={bundle:true,minify:true,metafile:true};
 const results=[
+ esbuild.buildSync({...common,entryPoints:['src/chapter-word.mjs'],outfile:'dist/chapter-word.cjs',platform:'node',format:'cjs',target:'node22',external:['electron']}),
  esbuild.buildSync({ ...common,entryPoints: ['src/rich-editor.js'], outfile: 'dist/renderer.js', platform: 'browser', target: 'chrome140' }),
- esbuild.buildSync({ ...common,entryPoints: ['src/core.mjs'], outfile: 'dist/document.cjs', platform: 'node', format: 'cjs', target: 'node22' })
+ esbuild.buildSync({ ...common,entryPoints: ['src/note-document.mjs'], outfile: 'dist/document.cjs', platform: 'node', format: 'cjs', target: 'node22' })
 ];
 // Dependencies are compiled into the bundles. Ship their license texts, rather
 // than duplicating their source trees and build artifacts in node_modules.

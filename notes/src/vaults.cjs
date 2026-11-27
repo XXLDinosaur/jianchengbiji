@@ -3,6 +3,27 @@ class Vaults {
  constructor(config){this.config=config;this.recent=[];this.root=null;this.bookmarks={};this.names={};this.ids={};}
  async init(){try{const data=JSON.parse(await fs.readFile(this.config,'utf8'));this.recent=data.recent||[];this.bookmarks=data.bookmarks||{};this.names=data.names||{};this.ids=data.ids||{};for(const root of this.recent)this.ids[root] ||= require('node:crypto').randomUUID();if(data.root)await this.select(data.root);}catch{}return this.state();}
  state(){return {root:this.root,recent:this.recent,bookmarks:this.bookmarks,names:this.names,ids:this.ids};}
+ async createNote(parent, suggestedName, markdown) {
+  if (typeof markdown !== 'string' || Buffer.byteLength(markdown) > 2_000_000) throw Error('模板内容无效或过大');
+  const root = this.root;
+  const folder = await this.resolve(parent);
+  const stem = this.name(suggestedName).replace(/\.md$/i, '');
+  this.name(stem);
+  for (let number = 1; number <= 10000; number++) {
+   if (root !== this.root) throw Error('仓库已切换，请重试');
+   const name = stem + (number === 1 ? '' : ' (' + number + ')') + '.md';
+   const file = path.join(folder, name);
+   let handle;
+   try { handle = await fs.open(file, 'wx'); }
+   catch (error) { if (error.code === 'EEXIST') continue; throw error; }
+   try {
+    try { await handle.writeFile(markdown, 'utf8'); }
+    finally { await handle.close(); }
+   } catch (error) { await fs.unlink(file); throw error; }
+   return path.relative(root, file);
+  }
+  throw Error('同名文档过多，请更换标题');
+ }
  async persist(){await fs.mkdir(path.dirname(this.config),{recursive:true});await fs.writeFile(this.config,JSON.stringify(this.state()));}
  async select(folder){const root=await fs.realpath(folder);if(!(await fs.stat(root)).isDirectory())throw Error('请选择文件夹');this.root=root;this.ids[root] ||= require('node:crypto').randomUUID();this.recent=[root,...this.recent.filter(p=>p!==root)].slice(0,15);await this.persist();return this.state();}
 

@@ -7,14 +7,16 @@
 
 | 产品 | 当前版本 | 定位 | 源码 |
 | --- | --- | --- | --- |
-| 简成文档（原名成简） | 0.5.9 | 专注单篇文档写作与记录，不包含仓库管理 | 本仓库根目录 |
-| 简成笔记 | 0.9.8 | 相同的编辑能力，加上本地仓库、文件夹和多文档标签管理 | [notes/](notes/) |
+| 简成文档（原名成简） | 0.5.11 | 专注单篇文档写作与记录，不包含仓库管理 | 本仓库根目录 |
+| 简成笔记 | 0.10.4 | 相同的编辑能力，加上本地仓库、文件夹和多文档标签管理 | [notes/](notes/) |
 
 ## 下载与本次更新
 
-**2026-11-09 · 简成笔记 0.9.8：修复保存冲突导致无法操作。** 当文件被外部修改、自动保存暂停时，新建及切换标签仍可使用，未保存内容保留在标签和恢复草稿中；关闭时正常确认，取消后可以再次操作。不会静默覆盖磁盘上的外部修改。
+**2026-11-27 · 简成笔记 0.10.4、简成文档 0.5.11**
 
-[简成笔记 0.9.8 MSI](https://github.com/XXLDinosaur/jianchengbiji/releases/download/documents-v0.5.9-notes-v0.9.8/Jiancheng-Notes-0.9.8-x64.msi) · [简成文档 0.5.9 MSI](https://github.com/XXLDinosaur/jianchengbiji/releases/download/documents-v0.5.9-notes-v0.9.8/Jiancheng-Documents-0.5.9-x64.msi)
+两款软件均支持拖入本地 Markdown 文档和「文件 → 检查更新」。简成笔记支持 #标签、全文搜索、文献摘录和按章节导出 Word。本版已移除会议面板和周会模板，已有纪要仍可作为普通笔记打开。
+
+[简成笔记 0.10.4 MSI](https://github.com/XXLDinosaur/jianchengbiji/releases/download/documents-v0.5.11-notes-v0.10.4/Jiancheng-Notes-0.10.4-x64.msi) · [简成文档 0.5.11 MSI](https://github.com/XXLDinosaur/jianchengbiji/releases/download/documents-v0.5.11-notes-v0.10.4/Jiancheng-Documents-0.5.11-x64.msi)
 
 此次同时更新两个产品：原保存文件夹不存在时，手动保存会提示选择新位置，取消则保留编辑内容，避免点击覆盖后出现 ENOENT。
 

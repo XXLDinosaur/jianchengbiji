@@ -1,5 +1,6 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, webUtils } = require('electron');
 contextBridge.exposeInMainWorld('desktop', {
+  checkUpdates:mode=>ipcRenderer.invoke('updates-check',mode), openUpdate:request=>ipcRenderer.invoke('updates-open',request),
   exportImages:sources=>ipcRenderer.invoke('export-images',sources),
   exportDocument:data=>ipcRenderer.invoke('export-document',data),
   windowControl:action=>ipcRenderer.invoke('window-control',action),
@@ -11,6 +12,7 @@ contextBridge.exposeInMainWorld('desktop', {
   initial: () => ipcRenderer.invoke('initial'), open: () => ipcRenderer.invoke('open'), newDocument: () => ipcRenderer.invoke('new'),
   dirty: value => ipcRenderer.invoke('dirty', value), confirmLeave: () => ipcRenderer.invoke('confirm-leave'),
   save: data => ipcRenderer.invoke('save', data), image: () => ipcRenderer.invoke('image'), pasteImage: () => ipcRenderer.invoke('paste-image'),
+  openDroppedDocument: file => ipcRenderer.invoke('open-dropped-document',webUtils.getPathForFile(file)),
   droppedImage: image => ipcRenderer.invoke('dropped-image', image),
   resolveImages: sources => ipcRenderer.invoke('resolve-images', sources), externalLink: url => ipcRenderer.invoke('external-link', url),
   closeResult: allow => ipcRenderer.invoke('close-result', allow), onClose: callback => ipcRenderer.on('request-close', callback)

@@ -1,3 +1,4 @@
+import {installFileDrop,imageFile} from './file-drop.js';
 import { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
@@ -68,7 +69,7 @@ function refresh() {
   $('saveState').textContent = dirty() ? (!filePath && draftSnapshot===snapshot()?'草稿已保存':'未保存') : filePath ? '已保存' : '新文档';
   $('autoSaveHint').textContent = autoPaused ? '保存未完成，请手动保存重试' : !autoEnabled() ? '自动保存已关闭' : !filePath ? (dirty() && draftSnapshot !== snapshot() ? '正在保存草稿…' : '草稿保存在本机 · 使用保存选择文档位置') : dirty() ? '正在实时保存…' : '所有内容已实时保存';
   $('wordCount').textContent = `${editor.getText().replace(/\s/g, '').length.toLocaleString()} 字`;
-  $('status').textContent = filePath || '直接输入文字 · 可拖入图片'; $('status').title = filePath || '';
+  $('status').textContent = filePath || '可拖入 Markdown 文档或图片'; $('status').title = filePath || '';
   api.dirty(dirty()); scheduleAutoSave(); document.dispatchEvent(new Event('document-updated'));
   $('tableTools').hidden = !editor.isActive('table');
   
@@ -126,7 +127,15 @@ async function save(saveAs = false, automatic = false) {
 }
 async function canLeave() { if (!dirty()) return true; const answer = await checked(api.confirmLeave()); return answer === 'discard' || (answer === 'save' && await save()); }
 $('newBtn').onclick = () => locked(async () => { if (await canLeave()) {await checked(api.draftWrite(null));load(await checked(api.newDocument()));} });
-$('openBtn').onclick = () => locked(async () => { if (await canLeave()) { const data = await checked(api.open()); if (data) {await checked(api.draftWrite(null));load(data);} } });
+async function openDocument(pick) {
+  if (!await canLeave()) return;
+  const data = await checked(pick());
+  if (!data) return;
+  load(data);
+  $('helpDialog')?.close();
+  await checked(api.draftWrite(null));
+}
+$('openBtn').onclick = () => locked(() => openDocument(() => api.open()));
 $('saveBtn').onclick = () => locked(() => save()); $('saveAsBtn').onclick = () => locked(() => save(true));
 const commands = { undo: 'undo', redo: 'redo', bold: 'toggleBold', italic: 'toggleItalic', strike: 'toggleStrike', bullet: 'toggleBulletList', ordered: 'toggleOrderedList', task: 'toggleTaskList', quote: 'toggleBlockquote', code: 'toggleCodeBlock' };
 document.querySelectorAll('[data-command]').forEach(button=>{button.onmousedown=e=>e.preventDefault();button.onclick=()=>{if(busy)return;if(button.dataset.command==='ordered')applyList(editor,'orderedList','decimal',true);else if(button.dataset.command==='bullet')applyList(editor,'bulletList','decimal',true);else {const level=editor.isActive('heading')?editor.getAttributes('heading').level:null;editor.chain().focus()[commands[button.dataset.command]]().run();if(level && button.dataset.command==='bullet')editor.commands.setHeading({level});}refresh();};});
@@ -141,7 +150,7 @@ async function importImages(kind, files = [], dropPosition = null) {
   const position = dropPosition ?? editor.state.selection.from; const results = [], errors = [];
   await locked(async () => {
     if (kind === 'files') {
-      const accepted = files.filter(file => /\.(png|jpe?g|gif|webp|svg|bmp|avif)$/i.test(file.name));
+      const accepted = files.filter(imageFile);
       if (!accepted.length) throw new Error('请拖入 PNG、JPG、SVG 等图片文件');
       if (accepted.length > 20) throw new Error('一次最多拖入 20 张图片');
       for (const file of accepted) { try { if (file.size > 40 * 1024 * 1024) throw new Error('图片超过 40 MB'); results.push(await checked(api.droppedImage({ name: file.name, bytes: new Uint8Array(await file.arrayBuffer()) }))); } catch(e) { errors.push(`${file.name}：${e.message}`); } }
@@ -151,14 +160,19 @@ async function importImages(kind, files = [], dropPosition = null) {
   if (errors.length) toast(errors[0]);
 }
 $('imageBtn').onclick = () => importImages('picker');
-let dragDepth = 0; const main = document.querySelector('main');
-const fileDrag = event => [...(event.dataTransfer?.types || [])].includes('Files');
-const clearDrag = () => { dragDepth = 0; main.classList.remove('file-drag-over'); };
-document.addEventListener('dragenter', e => { if (fileDrag(e)) { e.preventDefault(); dragDepth++; if (!busy) main.classList.add('file-drag-over'); } });
-document.addEventListener('dragover', e => { if (fileDrag(e)) { e.preventDefault(); e.dataTransfer.dropEffect = busy ? 'none' : 'copy'; } });
-document.addEventListener('dragleave', e => { if (fileDrag(e) && --dragDepth <= 0) clearDrag(); });
-document.addEventListener('dragend', clearDrag); window.addEventListener('blur', clearDrag);
-document.addEventListener('drop', e => { if (!fileDrag(e)) return; e.preventDefault(); e.stopPropagation(); clearDrag(); if ($('lightbox').open) return; const pos = editor.view.posAtCoords({ left: e.clientX, top: e.clientY })?.pos; importImages('files', [...e.dataTransfer.files], pos); }, true);
+installFileDrop({
+  isBusy:() => busy, toast,
+  async openDocuments(files) {
+    if (files.length !== 1) { toast('简成文档一次打开一篇，请每次拖入一个文档'); return; }
+    await startup;
+    await locked(() => openDocument(() => api.openDroppedDocument(files[0])));
+  },
+  async insertImages(files,coords) {
+    await startup;
+    $('helpDialog')?.close();
+    await importImages('files',files,editor.view.posAtCoords(coords)?.pos);
+  }
+});
 function resizeSelected(width) { if (busy || !selectedImage()) return; editor.chain().focus().updateAttributes('image', { width: width == null ? null : clamp(Math.round(width), 24, 8192) }).run(); refresh(); }
 $('imageWidth').onchange = () => { if (Number($('imageWidth').value) > 0) resizeSelected(Number($('imageWidth').value)); };
 $('imageWidth').onkeydown = e => { if (e.key === 'Enter') { e.preventDefault(); $('imageWidth').blur(); } };
@@ -182,7 +196,7 @@ installShortcuts({ blocked: () => busy || !editor, setBlock: level => { $('block
 api.onClose(async () => { if (busy) { api.closeResult(false); return; } await locked(async () => { let allow = false; try { if(autoEnabled() && !filePath && dirty()){await checked(api.draftWrite({text:serialize(),name:$('fileName').textContent}));allow=true;}else allow = await canLeave(); } finally { api.closeResult(allow); } }); });
 setZoom(zoom);
 import('./custom-colors.js');
-(async () => { try { const initial = await checked(api.initial()); const draft=initial?null:await checked(api.draftRead()); load(initial || (draft?{path:null,...draft}:{ path: null, name: '未命名.md', text: welcome }));if(draft){savedDocument='';refresh();toast('已恢复上次未命名草稿');} } catch(e) { load({ path: null, name: '未命名.md', text: '' }); toast(e.message); } })();
+const startup = (async () => { try { const initial = await checked(api.initial()); const draft=initial?null:await checked(api.draftRead()); load(initial || (draft?{path:null,...draft}:{ path: null, name: '未命名.md', text: welcome }));if(draft){savedDocument='';refresh();toast('已恢复上次未命名草稿');} } catch(e) { load({ path: null, name: '未命名.md', text: '' }); toast(e.message); } })();
 
 
 import('./outline.js');

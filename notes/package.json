@@ -1,13 +1,15 @@
 {
   "name": "chengjian-notes",
-  "version": "0.9.8",
+  "version": "0.10.4",
   "description": "简成笔记 — 本地仓库与文档编辑",
   "author": "成简",
   "license": "MIT",
   "main": "src/main.cjs",
   "scripts": {
+    "test:drop": "node tests/document-drop.cjs",
     "test:editor": "node tests/editing-parity.cjs",
     "test:parity": "node tests/editor-core-parity.cjs",
+    "test:updates": "node --test tests/updates.test.cjs && node tests/updates-ui.cjs",
     "icon": "node scripts/build-icon.cjs",
     "build": "node scripts/build.cjs",
     "start": "npm run build && electron .",
@@ -22,9 +24,11 @@
     "test:ui-v7": "node tests/ui-v7.cjs",
     "test:ui-v8": "node tests/ui-v8.cjs",
     "installer:msi": "npm run build && electron-builder --win msi --x64",
+    "test:workspace": "npm run build && node tests/search.cjs && node --test tests/research.test.cjs && node tests/search-ui.cjs && node tests/research-ui.cjs && node tests/sidebar-upgrade.cjs && node tests/chapter-word.cjs && node tests/tags.cjs",
     "test:welcome": "node tests/welcome-guide.cjs"
   },
   "devDependencies": {
+    "@mixmark-io/domino": "2.2.0",
     "@tiptap/core": "3.31.3",
     "@tiptap/extension-highlight": "^3.31.3",
     "@tiptap/extension-image": "3.31.3",
@@ -32,29 +36,31 @@
     "@tiptap/extension-task-item": "3.31.3",
     "@tiptap/extension-task-list": "3.31.3",
     "@tiptap/starter-kit": "3.31.3",
+    "docx": "9.16.0",
     "dompurify": "3.4.15",
-    "katex": "^0.18.7",
-    "marked": "18.0.13",
-    "remark-gfm": "4.0.1",
-    "remark-parse": "11.0.0",
-    "turndown": "7.2.4",
-    "turndown-plugin-gfm": "1.0.2",
-    "unified": "11.0.5",
-    "unist-util-visit": "5.0.0",
     "electron": "44.4.3",
     "electron-builder": "26.15.3",
     "esbuild": "0.27.4",
+    "katex": "^0.18.7",
+    "marked": "18.0.13",
     "playwright": "1.63.0",
-    "sharp": "0.35.4"
+    "remark-gfm": "4.0.1",
+    "remark-parse": "11.0.0",
+    "sharp": "0.35.4",
+    "turndown": "7.2.4",
+    "turndown-plugin-gfm": "1.0.2",
+    "unified": "11.0.5",
+    "unist-util-visit": "5.0.0"
   },
   "build": {
     "appId": "local.chengjian.notes",
     "productName": "简成笔记",
     "directories": {
-      "output": "发行版/MSI/0.9.8"
+      "output": "发行版/MSI/0.10.4"
     },
     "files": [
       "src/main.cjs",
+      "src/updates.cjs",
       "src/preload.cjs",
       "src/files.cjs",
       "dist/**/*",
@@ -62,6 +68,10 @@
       "src/vector-image.cjs",
       "src/vector-image.ps1",
       "src/vaults.cjs",
+      "src/tag-index.cjs",
+      "src/vault-search.cjs",
+      "src/research.cjs",
+      "src/research-source.cjs",
       "src/resources.cjs",
       "src/exports.cjs"
     ],
